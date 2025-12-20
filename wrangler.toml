@@ -1,0 +1,16 @@
+name = "black-tech-news"
+compatibility_date = "2024-12-01"
+
+pages_build_output_dir = "./out"
+
+[env.production]
+name = "black-tech-news-production"
+
+# Environment variables for production
+# Add these in Cloudflare Dashboard under Pages > Settings > Environment Variables
+# DB_HOST
+# DB_PORT
+# DB_NAME
+# DB_USER
+# DB_PASSWORD
+# DB_SSL

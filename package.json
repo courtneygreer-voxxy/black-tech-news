@@ -1,0 +1,37 @@
+{
+  "name": "black-tech-news",
+  "version": "1.0.0",
+  "description": "Black Tech News - The News You Need to Know",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "pages:deploy": "wrangler pages deploy ./out"
+  },
+  "dependencies": {
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "autoprefixer": "^10.4.21",
+    "cheerio": "^1.1.2",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.23.24",
+    "lucide-react": "^0.553.0",
+    "next": "^16.0.1",
+    "pg": "^8.13.1",
+    "postcss": "^8.5.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "rss-parser": "^3.13.0",
+    "tailwindcss": "^3.4.18",
+    "typescript": "^5.9.3",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.10",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "^16.0.1",
+    "wrangler": "^3.95.0"
+  }
+}
