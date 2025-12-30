@@ -31,6 +31,12 @@ export default function BTNFooter() {
 
           {/* Links */}
           <div className="flex items-center space-x-6">
+            <Link href="/terms" className="text-sm text-gray-400 hover:text-white transition-colors">
+                Terms
+            </Link>
+            <Link href="/privacy" className="text-sm text-gray-400 hover:text-white transition-colors">
+                Privacy
+            </Link>
             <a
               href="https://www.wolfdevelopmentstudio.com"
               target="_blank"

@@ -3,7 +3,7 @@
 
 export const API_CONFIG = {
   // Base URL for Wolf Studio API
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://www.wolfdevelopmentstudio.com',
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://www.wolfdevelopmentstudio.com/api/articles/',
 
   // API endpoints
   endpoints: {
