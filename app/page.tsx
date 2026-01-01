@@ -12,22 +12,68 @@ import { fetchArticles } from '@/lib/api/articles';
 export default function HomePage() {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Fetch articles from Wolf Studio's shared API
+  // Load cached data from localStorage on mount
   useEffect(() => {
-    async function loadArticles() {
+    const cached = localStorage.getItem('btn_articles');
+    const cachedTime = localStorage.getItem('btn_last_refresh');
+
+    if (cached && cachedTime) {
       try {
-        setLoading(true);
-        const data = await fetchArticles(50); // Get up to 50 articles
-        setArticles(data);
+        const parsedArticles = JSON.parse(cached);
+        // Convert date strings back to Date objects
+        const articlesWithDates = parsedArticles.map((article: any) => ({
+          ...article,
+          publishedAt: new Date(article.publishedAt),
+        }));
+        setArticles(articlesWithDates);
+        setLastRefresh(new Date(cachedTime));
       } catch (error) {
-        console.error('Error loading articles:', error);
-      } finally {
-        setLoading(false);
+        console.error('Error loading cached articles:', error);
       }
     }
+  }, []);
 
-    loadArticles();
+  // Function to fetch and refresh articles
+  const loadArticles = async (showRefreshingState = false) => {
+    try {
+      if (showRefreshingState) {
+        setIsRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
+      const data = await fetchArticles(50); // Get up to 50 articles
+      setArticles(data);
+
+      // Update last refresh timestamp
+      const now = new Date();
+      setLastRefresh(now);
+
+      // Cache articles and timestamp in localStorage
+      localStorage.setItem('btn_articles', JSON.stringify(data));
+      localStorage.setItem('btn_last_refresh', now.toISOString());
+    } catch (error) {
+      console.error('Error loading articles:', error);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  // Initial fetch on mount (if no cache or cache is old)
+  useEffect(() => {
+    const cachedTime = localStorage.getItem('btn_last_refresh');
+    const shouldFetch = !cachedTime ||
+      (Date.now() - new Date(cachedTime).getTime() > 5 * 60 * 1000); // 5 minutes
+
+    if (shouldFetch) {
+      loadArticles();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const featuredArticle = articles[0];
@@ -38,7 +84,11 @@ export default function HomePage() {
       {/* SEO: Structured Data for GenAI Discovery */}
       {articles.length > 0 && <StructuredData articles={articles} />}
 
-      <BTNNavbar />
+      <BTNNavbar
+        onRefresh={() => loadArticles(true)}
+        isRefreshing={isRefreshing}
+        lastRefresh={lastRefresh}
+      />
       <BTNHero />
 
       {/* Main Content */}
