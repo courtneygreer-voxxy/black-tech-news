@@ -5,7 +5,8 @@ import BTNNavbar from '@/components/BTNNavbar';
 import BTNHero from '@/components/BTNHero';
 import BTNFooter from '@/components/BTNFooter';
 import ArticleCard from '@/components/ArticleCard';
-import ArticleFilters, { ActiveFilters, FilterOptions } from '@/components/ArticleFilters';
+import HeroArticle from '@/components/HeroArticle';
+import SidebarFilters, { ActiveFilters, FilterOptions } from '@/components/SidebarFilters';
 import Pagination from '@/components/Pagination';
 import StructuredData from '@/components/StructuredData';
 import { NewsArticle } from '@/lib/news/types';
@@ -170,8 +171,10 @@ export default function HomePage() {
     window.scrollTo({ top: 300, behavior: 'smooth' });
   };
 
-  const featuredArticle = filteredArticles[0];
-  const regularArticles = paginatedArticles.slice(featuredArticle ? 1 : 0);
+  const heroArticle = filteredArticles[0];
+  const regularArticles = currentPage === 1
+    ? filteredArticles.slice(1, ITEMS_PER_PAGE)
+    : paginatedArticles;
 
   return (
     <div className="min-h-screen bg-white">
@@ -186,7 +189,7 @@ export default function HomePage() {
       <BTNHero />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-8 lg:px-16 py-16">
+      <main className="max-w-7xl mx-auto px-8 lg:px-16 py-12">
         {loading ? (
           <div className="flex items-center justify-center py-32">
             <div className="space-y-4 text-center">
@@ -213,9 +216,9 @@ export default function HomePage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-8">
-            {/* Filters & Search */}
-            <ArticleFilters
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Sidebar Filters */}
+            <SidebarFilters
               filterOptions={filterOptions}
               activeFilters={activeFilters}
               onFilterChange={handleFilterChange}
@@ -223,61 +226,60 @@ export default function HomePage() {
               totalCount={articles.length}
             />
 
-            {/* Filtered Articles */}
-            {filteredArticles.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="flex justify-center space-x-2 mb-6">
-                  <div className="w-4 h-16 bg-gray-300"></div>
-                  <div className="w-4 h-16 bg-gray-300"></div>
-                  <div className="w-4 h-16 bg-gray-300"></div>
+            {/* Content Area */}
+            <div className="flex-1 min-w-0">
+              {filteredArticles.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="flex justify-center space-x-2 mb-6">
+                    <div className="w-4 h-16 bg-gray-300"></div>
+                    <div className="w-4 h-16 bg-gray-300"></div>
+                    <div className="w-4 h-16 bg-gray-300"></div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    No Articles Found
+                  </h3>
+                  <p className="text-gray-600">
+                    Try adjusting your filters or search query.
+                  </p>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  No Articles Found
-                </h3>
-                <p className="text-gray-600">
-                  Try adjusting your filters or search query.
-                </p>
-              </div>
-            ) : (
-              <>
-                {/* Featured Article (only on page 1) */}
-                {currentPage === 1 && featuredArticle && (
-                  <section>
-                    <div className="mb-4">
-                      <h2 className="text-2xl font-bold text-black">Featured Story</h2>
-                    </div>
-                    <ArticleCard article={featuredArticle} featured />
-                  </section>
-                )}
+              ) : (
+                <div className="space-y-12">
+                  {/* Hero Article (only on page 1) */}
+                  {currentPage === 1 && heroArticle && (
+                    <section>
+                      <HeroArticle article={heroArticle} />
+                    </section>
+                  )}
 
-                {/* Regular Articles */}
-                {regularArticles.length > 0 && (
-                  <section className="space-y-8">
-                    <div className="flex items-center space-x-4">
-                      <h2 className="text-2xl font-bold text-black">
-                        {currentPage === 1 ? 'Latest Stories' : `Stories (Page ${currentPage})`}
-                      </h2>
-                      <div className="flex-1 h-px bg-gray-200"></div>
-                    </div>
+                  {/* Regular Articles */}
+                  {regularArticles.length > 0 && (
+                    <section className="space-y-8">
+                      <div className="flex items-center space-x-4">
+                        <h2 className="text-2xl font-bold text-black">
+                          {currentPage === 1 ? 'More Stories' : `Page ${currentPage}`}
+                        </h2>
+                        <div className="flex-1 h-px bg-gray-200"></div>
+                      </div>
 
-                    <div className="space-y-8">
-                      {regularArticles.map((article) => (
-                        <ArticleCard key={article.id} article={article} />
-                      ))}
-                    </div>
+                      <div className="grid gap-8 md:grid-cols-2">
+                        {regularArticles.map((article) => (
+                          <ArticleCard key={article.id} article={article} />
+                        ))}
+                      </div>
 
-                    {/* Pagination */}
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      onPageChange={handlePageChange}
-                      itemsPerPage={ITEMS_PER_PAGE}
-                      totalItems={filteredArticles.length}
-                    />
-                  </section>
-                )}
-              </>
-            )}
+                      {/* Pagination */}
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                        itemsPerPage={ITEMS_PER_PAGE}
+                        totalItems={filteredArticles.length}
+                      />
+                    </section>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </main>
