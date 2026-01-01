@@ -1,19 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import BTNNavbar from '@/components/BTNNavbar';
 import BTNHero from '@/components/BTNHero';
 import BTNFooter from '@/components/BTNFooter';
 import ArticleCard from '@/components/ArticleCard';
+import ArticleFilters, { ActiveFilters, FilterOptions } from '@/components/ArticleFilters';
+import Pagination from '@/components/Pagination';
 import StructuredData from '@/components/StructuredData';
 import { NewsArticle } from '@/lib/news/types';
 import { fetchArticles } from '@/lib/api/articles';
+
+const ITEMS_PER_PAGE = 10;
 
 export default function HomePage() {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [activeFilters, setActiveFilters] = useState<ActiveFilters>({
+    searchQuery: '',
+    selectedSources: [],
+    selectedCategories: [],
+    selectedTags: [],
+  });
 
   // Load cached data from localStorage on mount
   useEffect(() => {
@@ -76,8 +87,91 @@ export default function HomePage() {
     }
   }, []);
 
-  const featuredArticle = articles[0];
-  const regularArticles = articles.slice(1);
+  // Extract dynamic filter options from loaded articles
+  const filterOptions = useMemo<FilterOptions>(() => {
+    const sources = new Set<string>();
+    const categories = new Set<string>();
+    const tags = new Set<string>();
+
+    articles.forEach((article) => {
+      sources.add(article.source.name);
+      categories.add(article.category);
+      article.tags.forEach((tag) => tags.add(tag));
+    });
+
+    return {
+      sources: Array.from(sources).sort(),
+      categories: Array.from(categories) as any,
+      tags: Array.from(tags).sort(),
+    };
+  }, [articles]);
+
+  // Filter articles based on active filters
+  const filteredArticles = useMemo(() => {
+    let filtered = [...articles];
+
+    // Search query filter
+    if (activeFilters.searchQuery) {
+      const query = activeFilters.searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (article) =>
+          article.title.toLowerCase().includes(query) ||
+          article.excerpt.toLowerCase().includes(query) ||
+          article.content?.toLowerCase().includes(query) ||
+          article.author?.toLowerCase().includes(query)
+      );
+    }
+
+    // Source filter
+    if (activeFilters.selectedSources.length > 0) {
+      filtered = filtered.filter((article) =>
+        activeFilters.selectedSources.includes(article.source.name)
+      );
+    }
+
+    // Category filter
+    if (activeFilters.selectedCategories.length > 0) {
+      filtered = filtered.filter((article) =>
+        activeFilters.selectedCategories.includes(article.category)
+      );
+    }
+
+    // Tag filter
+    if (activeFilters.selectedTags.length > 0) {
+      filtered = filtered.filter((article) =>
+        article.tags.some((tag) => activeFilters.selectedTags.includes(tag))
+      );
+    }
+
+    return filtered;
+  }, [articles, activeFilters]);
+
+  // Paginate filtered articles
+  const paginatedArticles = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredArticles.slice(startIndex, endIndex);
+  }, [filteredArticles, currentPage]);
+
+  const totalPages = Math.ceil(filteredArticles.length / ITEMS_PER_PAGE);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeFilters]);
+
+  const handleFilterChange = (newFilters: ActiveFilters) => {
+    setActiveFilters(newFilters);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of articles section
+    window.scrollTo({ top: 300, behavior: 'smooth' });
+  };
+
+  const featuredArticle = filteredArticles[0];
+  const regularArticles = paginatedArticles.slice(featuredArticle ? 1 : 0);
 
   return (
     <div className="min-h-screen bg-white">
@@ -119,33 +213,70 @@ export default function HomePage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-16">
-            {/* Featured Article */}
-            {featuredArticle && (
-              <section>
-                <ArticleCard article={featuredArticle} featured />
-              </section>
-            )}
+          <div className="space-y-8">
+            {/* Filters & Search */}
+            <ArticleFilters
+              filterOptions={filterOptions}
+              activeFilters={activeFilters}
+              onFilterChange={handleFilterChange}
+              resultCount={filteredArticles.length}
+              totalCount={articles.length}
+            />
 
-            {/* Regular Articles Grid */}
-            {regularArticles.length > 0 && (
-              <section className="space-y-8">
-                <div className="flex items-center space-x-4">
-                  <h2 className="text-2xl font-bold text-black">
-                    Latest Stories
-                  </h2>
-                  <div className="flex-1 h-px bg-gray-200"></div>
-                  <span className="text-sm text-gray-500">
-                    {regularArticles.length} {regularArticles.length === 1 ? 'story' : 'stories'}
-                  </span>
+            {/* Filtered Articles */}
+            {filteredArticles.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="flex justify-center space-x-2 mb-6">
+                  <div className="w-4 h-16 bg-gray-300"></div>
+                  <div className="w-4 h-16 bg-gray-300"></div>
+                  <div className="w-4 h-16 bg-gray-300"></div>
                 </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  No Articles Found
+                </h3>
+                <p className="text-gray-600">
+                  Try adjusting your filters or search query.
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Featured Article (only on page 1) */}
+                {currentPage === 1 && featuredArticle && (
+                  <section>
+                    <div className="mb-4">
+                      <h2 className="text-2xl font-bold text-black">Featured Story</h2>
+                    </div>
+                    <ArticleCard article={featuredArticle} featured />
+                  </section>
+                )}
 
-                <div className="space-y-8">
-                  {regularArticles.map((article) => (
-                    <ArticleCard key={article.id} article={article} />
-                  ))}
-                </div>
-              </section>
+                {/* Regular Articles */}
+                {regularArticles.length > 0 && (
+                  <section className="space-y-8">
+                    <div className="flex items-center space-x-4">
+                      <h2 className="text-2xl font-bold text-black">
+                        {currentPage === 1 ? 'Latest Stories' : `Stories (Page ${currentPage})`}
+                      </h2>
+                      <div className="flex-1 h-px bg-gray-200"></div>
+                    </div>
+
+                    <div className="space-y-8">
+                      {regularArticles.map((article) => (
+                        <ArticleCard key={article.id} article={article} />
+                      ))}
+                    </div>
+
+                    {/* Pagination */}
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                      itemsPerPage={ITEMS_PER_PAGE}
+                      totalItems={filteredArticles.length}
+                    />
+                  </section>
+                )}
+              </>
             )}
           </div>
         )}
