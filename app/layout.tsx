@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import CookieConsentBanner from '@/components/CookieConsentBanner';
+import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
   title: 'Black Tech News | Breaking News for Black Tech Professionals & Startups',
@@ -101,6 +102,7 @@ export default function RootLayout({
       />
       <body>
         {children}
+        <Footer />
         <CookieConsentBanner />
       </body>
     </html>
