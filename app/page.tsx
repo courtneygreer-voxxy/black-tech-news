@@ -11,6 +11,7 @@ import Pagination from '@/components/Pagination';
 import StructuredData from '@/components/StructuredData';
 import { NewsArticle } from '@/lib/news/types';
 import { fetchArticles } from '@/lib/api/articles';
+import { useScrollDepth, useTimeOnPage, trackFilterApplied, trackSearch } from '@/lib/analytics';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -25,6 +26,17 @@ export default function HomePage() {
     selectedSources: [],
     selectedTags: [],
   });
+
+  // Analytics: Track scroll depth and time on page
+  useEffect(() => {
+    const cleanupScroll = useScrollDepth();
+    const cleanupTime = useTimeOnPage();
+
+    return () => {
+      if (cleanupScroll) cleanupScroll();
+      if (cleanupTime) cleanupTime();
+    };
+  }, []);
 
   // Load cached data from localStorage on mount
   useEffect(() => {
@@ -152,6 +164,38 @@ export default function HomePage() {
 
   const handleFilterChange = (newFilters: ActiveFilters) => {
     setActiveFilters(newFilters);
+
+    // Track search queries
+    if (newFilters.searchQuery && newFilters.searchQuery !== activeFilters.searchQuery) {
+      trackSearch(newFilters.searchQuery, filteredArticles.length);
+    }
+
+    // Track source filter changes
+    if (newFilters.selectedSources.length !== activeFilters.selectedSources.length) {
+      const added = newFilters.selectedSources.filter(s => !activeFilters.selectedSources.includes(s));
+      const removed = activeFilters.selectedSources.filter(s => !newFilters.selectedSources.includes(s));
+
+      added.forEach(source => {
+        trackFilterApplied({
+          filterType: 'source',
+          filterValue: source,
+          resultCount: filteredArticles.length,
+        });
+      });
+    }
+
+    // Track tag filter changes
+    if (newFilters.selectedTags.length !== activeFilters.selectedTags.length) {
+      const added = newFilters.selectedTags.filter(t => !activeFilters.selectedTags.includes(t));
+
+      added.forEach(tag => {
+        trackFilterApplied({
+          filterType: 'tag',
+          filterValue: tag,
+          resultCount: filteredArticles.length,
+        });
+      });
+    }
   };
 
   const handlePageChange = (page: number) => {
@@ -251,9 +295,20 @@ export default function HomePage() {
                       </div>
 
                       <div className="grid gap-8 md:grid-cols-2">
-                        {regularArticles.map((article) => (
-                          <ArticleCard key={article.id} article={article} />
-                        ))}
+                        {regularArticles.map((article, index) => {
+                          // Calculate global position (accounting for hero article and pagination)
+                          const globalPosition = currentPage === 1
+                            ? index + 2 // +2 because hero is position 1
+                            : (currentPage - 1) * ITEMS_PER_PAGE + index + 1;
+
+                          return (
+                            <ArticleCard
+                              key={article.id}
+                              article={article}
+                              position={globalPosition}
+                            />
+                          );
+                        })}
                       </div>
 
                       {/* Pagination */}

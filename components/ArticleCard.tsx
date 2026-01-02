@@ -2,19 +2,40 @@
 
 import { NewsArticle } from '@/lib/news/types';
 import { trackArticleView } from '@/lib/api/articles';
+import { trackArticleClick, trackExternalClick } from '@/lib/analytics';
 
 interface ArticleCardProps {
   article: NewsArticle;
   featured?: boolean;
+  position?: number; // Position in the list for analytics
 }
 
 export default function ArticleCard({
   article,
   featured = false,
+  position = 0,
 }: ArticleCardProps) {
-  // Track article click
+  // Track article click with comprehensive analytics
   const handleClick = () => {
+    // Track internal view count (Wolf Studio API)
     trackArticleView(article.url, article.title, article.source.name);
+
+    // Track GA4 analytics
+    trackArticleClick({
+      articleTitle: article.title,
+      articleUrl: article.url,
+      source: article.source.name,
+      position,
+      hasImage: !!article.imageUrl,
+    });
+
+    // Track outbound click (traffic to partner sites)
+    trackExternalClick({
+      articleTitle: article.title,
+      articleUrl: article.url,
+      source: article.source.name,
+      destination: article.url, // The external source URL
+    });
   };
 
   if (featured) {

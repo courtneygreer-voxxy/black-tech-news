@@ -74,15 +74,28 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/* Google tag (gtag.js) */}
+      {/* Google tag (gtag.js) - Privacy-First Setup */}
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-FMKD0JYBF8"></script>
       <script
         dangerouslySetInnerHTML={{
           __html: `
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
+
+            // Set default consent to denied (privacy-first)
+            gtag('consent', 'default', {
+              'analytics_storage': 'denied',
+              'ad_storage': 'denied',
+              'ad_user_data': 'denied',
+              'ad_personalization': 'denied',
+              'wait_for_update': 500
+            });
+
             gtag('js', new Date());
-            gtag('config', 'G-FMKD0JYBF8');
+            gtag('config', 'G-FMKD0JYBF8', {
+              'anonymize_ip': true,
+              'cookie_flags': 'SameSite=None;Secure'
+            });
           `,
         }}
       />
