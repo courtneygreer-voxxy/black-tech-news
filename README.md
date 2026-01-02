@@ -1,48 +1,69 @@
 # Black Tech News
 
-**The News You Need to Know** - Daily curated technology news for Black professionals, startups, and innovation.
+> **Your Pulse on Black Innovation** - Celebrating Black excellence in technology, startups, and digital culture.
 
-## Live Site
+Black Tech News is a premium news aggregator showcasing the latest innovations, achievements, and opportunities in Black tech. Powered by the [Wolf Development Studio API](https://github.com/courtneygreer-voxxy/wolf-development-studio).
 
-🌐 **https://blacktechnews.cc**
+---
 
-## Overview
+## 🌐 Live Site
 
-Black Tech News is a standalone news aggregation platform focused on elevating Black excellence in technology. The site features:
+**https://blacktechnews.cc** (coming soon)
 
-- **Curated News Feed** from trusted sources (Black Enterprise, TechCrunch Diversity, POCIT, and more)
-- **Pan-African Design** with red, black, and green color scheme
-- **Database Storage** for articles using Google Cloud SQL (PostgreSQL)
-- **Professional Magazine Layout** inspired by Vogue and TechCrunch
-- **SEO Optimized** with structured data for search engines and GenAI discovery
+---
 
-## Tech Stack
+## ✨ Features
 
-- **Framework**: Next.js 16 (React 19)
+### Curated Content
+- **Hand-picked sources** from trusted Black tech publications
+- **Image-prioritized layout** for visual appeal
+- **Real-time updates** from RSS feeds
+- **Clean, magazine-quality design** inspired by Vogue and TechCrunch
+
+### Pan-African Design
+- **Red, Black, Green color scheme** celebrating Pan-African heritage
+- **Professional typography** with modern styling
+- **Responsive layout** optimized for all devices
+- **Smooth animations** for enhanced user experience
+
+### Powered by Wolf Studio API
+- **Centralized content aggregation** via Wolf Development Studio backend
+- **Client-side customization** for Black Tech News-specific display preferences
+- **View tracking** and analytics
+- **Scalable architecture** for future features
+
+---
+
+## 🚀 Tech Stack
+
+- **Framework**: Next.js 16.1.0 (React 19)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Database**: Google Cloud SQL (PostgreSQL)
+- **API**: Wolf Development Studio (Vercel)
 - **Deployment**: Cloudflare Pages
-- **RSS Parsing**: rss-parser
-- **Web Scraping**: Cheerio
+- **Date Handling**: date-fns
 
-## Getting Started
+---
+
+## 💻 Getting Started
 
 ### Prerequisites
 
 - Node.js 18+ and npm
-- Google Cloud SQL instance (PostgreSQL)
-- Cloudflare account (for deployment)
+- Access to Wolf Development Studio API (public)
 
 ### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/courtneygreer-voxxy/black-tech-news.git
+cd black-tech-news
+
 # Install dependencies
 npm install
 
 # Set up environment variables
 cp .env.example .env.local
-# Edit .env.local with your database credentials
 
 # Run development server
 npm run dev
@@ -50,162 +71,216 @@ npm run dev
 
 The development server will be available at [http://localhost:3000](http://localhost:3000).
 
-### Database Setup
+### Environment Variables
 
-1. **Create a Google Cloud SQL PostgreSQL instance**
-   - Go to Google Cloud Console > SQL
-   - Create a new PostgreSQL instance
-   - Note the connection details (host, port, database name, user, password)
+Create a `.env.local` file:
 
-2. **Run the database schema**
-   ```bash
-   # Connect to your Cloud SQL instance
-   psql -h YOUR_DB_HOST -U YOUR_DB_USER -d YOUR_DB_NAME
+```env
+# Wolf Development Studio API URL
+NEXT_PUBLIC_API_URL=https://wolf-development-studio.vercel.app
+```
 
-   # Run the schema file
-   \i lib/db/schema.sql
-   ```
+---
 
-3. **Update your environment variables**
-   Edit `.env.local` with your database credentials:
-   ```
-   DB_HOST=your-cloud-sql-instance-ip
-   DB_PORT=5432
-   DB_NAME=blacktechnews
-   DB_USER=your-db-user
-   DB_PASSWORD=your-db-password
-   DB_SSL=true
-   ```
-
-4. **Test the connection**
-   The app will automatically test the database connection when it starts.
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 black-tech-news/
-├── app/                    # Next.js app directory
-│   ├── layout.tsx         # Root layout with SEO metadata
-│   ├── page.tsx           # Homepage
-│   └── globals.css        # Global styles
-├── components/            # React components
-│   ├── BTNNavbar.tsx      # Navigation bar
-│   ├── BTNHero.tsx        # Hero section
-│   ├── BTNFooter.tsx      # Footer
-│   ├── ArticleCard.tsx    # Article display component
-│   └── StructuredData.tsx # SEO structured data
-├── lib/                   # Utilities and business logic
-│   ├── news/              # News aggregation
-│   │   ├── types.ts       # TypeScript interfaces
-│   │   └── sources.ts     # News source configurations
-│   └── db/                # Database layer
-│       ├── schema.sql     # PostgreSQL schema
-│       ├── client.ts      # Database connection
-│       └── articles.ts    # Article CRUD operations
-├── public/                # Static assets
-├── .env.example           # Example environment variables
-├── wrangler.toml          # Cloudflare Pages configuration
-├── next.config.ts         # Next.js configuration
-├── tailwind.config.ts     # Tailwind configuration
-└── package.json           # Dependencies
+├── app/
+│   ├── layout.tsx              # Root layout with SEO metadata
+│   ├── page.tsx                # Homepage with article feed
+│   └── globals.css             # Global styles and animations
+├── components/
+│   ├── BTNNavbar.tsx           # Navigation bar
+│   ├── BTNHero.tsx             # Hero section ("Your Pulse on Black Innovation")
+│   ├── BTNFooter.tsx           # Footer with Wolf Studio branding
+│   ├── HeroArticle.tsx         # Featured article card
+│   ├── ArticleCard.tsx         # Article grid card
+│   └── ArticleFilters.tsx      # Filter controls (future)
+├── lib/
+│   ├── api/
+│   │   └── articles.ts         # API integration & client-side sorting
+│   ├── config.ts               # API configuration
+│   └── news/
+│       └── types.ts            # TypeScript interfaces
+├── public/
+│   └── sources/                # Source logos
+├── .env.local                  # Environment variables (not committed)
+├── next.config.ts              # Next.js configuration
+└── tailwind.config.ts          # Tailwind configuration
 ```
 
-## Deployment
+---
 
-### Cloudflare Pages
+## 🎨 Key Components
+
+### Hero Section
+```typescript
+// components/BTNHero.tsx
+"Your Pulse on Black Innovation"
+"Celebrating Black excellence in technology, startups, and digital culture"
+```
+
+### Article Sorting
+Black Tech News implements **client-side image prioritization**:
+- Articles with images appear first
+- Then sorted by publication date (newest first)
+- Provides optimal visual experience for readers
+
+```typescript
+// lib/api/articles.ts
+articles.sort((a, b) => {
+  const aHasImage = a.imageUrl ? 1 : 0;
+  const bHasImage = b.imageUrl ? 1 : 0;
+
+  if (aHasImage !== bHasImage) {
+    return bHasImage - aHasImage; // Images first
+  }
+
+  return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+});
+```
+
+---
+
+## 🚢 Deployment
+
+### Cloudflare Pages (Recommended)
 
 1. **Build the static site**
-   ```bash
-   npm run build
-   ```
-   This creates an `out/` directory with static files.
+```bash
+npm run build
+```
 
-2. **Deploy to Cloudflare Pages**
-   ```bash
-   npm run pages:deploy
-   ```
-
-   Or deploy via the Cloudflare Dashboard:
-   - Go to Pages > Create a project
+2. **Deploy via Cloudflare Dashboard**
+   - Go to Pages → Create a project
    - Connect your GitHub repository
    - Build command: `npm run build`
    - Build output directory: `out`
+   - Framework preset: Next.js (Static HTML Export)
 
-3. **Set environment variables in Cloudflare**
-   - Go to Pages > Your Project > Settings > Environment Variables
-   - Add: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_SSL`
+3. **Set environment variables**
+   - Go to Settings → Environment Variables
+   - Add: `NEXT_PUBLIC_API_URL=https://wolf-development-studio.vercel.app`
 
-4. **Connect your domain (blacktechnews.cc)**
-   - Go to Pages > Your Project > Custom domains
-   - Add `blacktechnews.cc`
-   - Update your domain's DNS records at your registrar:
-     - Add a CNAME record pointing to your Cloudflare Pages URL
+4. **Configure custom domain**
+   - Add custom domain: `blacktechnews.cc`
+   - Update DNS records at your registrar
 
-## Features
+---
 
-### News Aggregation
-- Fetches articles from multiple RSS feeds
-- CORS proxy support for client-side fetching
-- Automatic categorization and tagging
+## 🔧 Configuration
 
-### Database Storage
-- Articles stored in Google Cloud SQL
-- Automatic de-duplication by URL
-- View count tracking
-- Featured article support
-- Old article cleanup
+### API Integration
 
-### SEO & Discovery
-- Comprehensive metadata for social sharing
-- Structured data (Schema.org) for search engines
-- GenAI-optimized content structure
-- Sitemap generation (coming soon)
-
-### Design
-- Pan-African color scheme (red, black, green)
-- Magazine-quality typography
-- Responsive design for all devices
-- Smooth animations and transitions
-
-## Development
-
-### Adding New News Sources
-
-Edit `lib/news/sources.ts`:
+Black Tech News consumes the Wolf Development Studio API:
 
 ```typescript
-{
-  id: 'new-source',
-  name: 'Source Name',
-  url: 'https://source.com/feed.rss',
-  type: 'rss',
-}
+// lib/config.ts
+export const API_CONFIG = {
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://wolf-development-studio.vercel.app',
+  endpoints: {
+    articles: {
+      list: '/api/articles/list',
+      featured: '/api/articles/featured',
+      view: '/api/articles/view',
+    },
+  },
+};
 ```
 
-### Database Operations
+### Fetching Articles
 
 ```typescript
-import { getArticles, upsertArticle } from '@/lib/db/articles';
+import { fetchArticles } from '@/lib/api/articles';
 
-// Get articles
-const articles = await getArticles(50, 0);
-
-// Save an article
-await upsertArticle(articleData);
+const articles = await fetchArticles(50); // Get 50 articles
 ```
 
-## Environment Variables
+### Tracking Views
 
-See `.env.example` for all required environment variables.
+```typescript
+import { trackArticleView } from '@/lib/api/articles';
 
-## License
+trackArticleView(articleUrl, articleTitle, sourceName);
+```
 
-© 2025 Black Tech News. All rights reserved.
+---
 
-## Powered By
+## 🎯 Roadmap
 
-[Wolf Development Studio](https://www.wolfdevelopmentstudio.com)
+### Current Features
+- [x] Wolf Studio API integration
+- [x] Client-side image prioritization
+- [x] Pan-African design system
+- [x] Responsive layout
+- [x] Article view tracking
+- [x] Hero messaging
 
-## Support
+### Coming Soon
+- [ ] User bookmarking (save articles)
+- [ ] Email newsletter sign-up
+- [ ] Social sharing enhancements
+- [ ] Category browsing (topics)
+- [ ] Search functionality
+- [ ] Dark mode support
+- [ ] PWA (Progressive Web App) support
 
-For issues or questions, please contact Wolf Development Studio.
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes
+4. Push to the branch
+5. Open a pull request
+
+---
+
+## 📊 Analytics
+
+Black Tech News tracks article views through the Wolf Studio API for analytics purposes. No personal data is collected.
+
+---
+
+## 🔗 Related Projects
+
+- **[Wolf Development Studio API](https://github.com/courtneygreer-voxxy/wolf-development-studio)** - The backend API powering this site
+- **Infinity Minds** - AI Startup Tracker (planned)
+- **News Checker** - News Validity System (planned)
+- **Spin the Globe News** - Global News Platform (planned)
+
+---
+
+## 📄 License
+
+© 2026 Black Tech News. All rights reserved.
+
+---
+
+## 🙏 Acknowledgments
+
+**Powered by [Wolf Development Studio](https://github.com/courtneygreer-voxxy/wolf-development-studio)**
+
+Thank you to all the Black tech publications whose content we aggregate and amplify. This platform exists to celebrate and elevate your voices.
+
+### News Sources
+- Black Enterprise
+- Afrotech
+- UrbanGeekz
+- Wired (Black tech content)
+- And more...
+
+---
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/courtneygreer-voxxy/black-tech-news/issues)
+- **API Documentation**: [Wolf Studio README](https://github.com/courtneygreer-voxxy/wolf-development-studio/blob/main/README.md)
+
+---
+
+**Built with ❤️ for the Black tech community**

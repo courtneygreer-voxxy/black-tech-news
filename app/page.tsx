@@ -23,7 +23,6 @@ export default function HomePage() {
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({
     searchQuery: '',
     selectedSources: [],
-    selectedCategories: [],
     selectedTags: [],
   });
 
@@ -91,18 +90,15 @@ export default function HomePage() {
   // Extract dynamic filter options from loaded articles
   const filterOptions = useMemo<FilterOptions>(() => {
     const sources = new Set<string>();
-    const categories = new Set<string>();
     const tags = new Set<string>();
 
     articles.forEach((article) => {
       sources.add(article.source.name);
-      categories.add(article.category);
       article.tags.forEach((tag) => tags.add(tag));
     });
 
     return {
       sources: Array.from(sources).sort(),
-      categories: Array.from(categories) as any,
       tags: Array.from(tags).sort(),
     };
   }, [articles]);
@@ -127,13 +123,6 @@ export default function HomePage() {
     if (activeFilters.selectedSources.length > 0) {
       filtered = filtered.filter((article) =>
         activeFilters.selectedSources.includes(article.source.name)
-      );
-    }
-
-    // Category filter
-    if (activeFilters.selectedCategories.length > 0) {
-      filtered = filtered.filter((article) =>
-        activeFilters.selectedCategories.includes(article.category)
       );
     }
 

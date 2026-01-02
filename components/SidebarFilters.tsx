@@ -1,18 +1,15 @@
 'use client';
 
 import { Search, X, Filter } from 'lucide-react';
-import { NewsCategory } from '@/lib/news/types';
 
 export interface FilterOptions {
   sources: string[];
-  categories: NewsCategory[];
   tags: string[];
 }
 
 export interface ActiveFilters {
   searchQuery: string;
   selectedSources: string[];
-  selectedCategories: NewsCategory[];
   selectedTags: string[];
 }
 
@@ -24,15 +21,6 @@ interface SidebarFiltersProps {
   totalCount: number;
 }
 
-const CATEGORY_LABELS: Record<NewsCategory, string> = {
-  'startups-funding': 'Startups & Funding',
-  'careers-opportunities': 'Careers',
-  'innovation-products': 'Innovation',
-  'community-events': 'Community',
-  'policy-impact': 'Policy',
-  'general': 'General',
-};
-
 export default function SidebarFilters({
   filterOptions,
   activeFilters,
@@ -43,7 +31,6 @@ export default function SidebarFilters({
   const hasActiveFilters =
     activeFilters.searchQuery ||
     activeFilters.selectedSources.length > 0 ||
-    activeFilters.selectedCategories.length > 0 ||
     activeFilters.selectedTags.length > 0;
 
   const handleSearchChange = (query: string) => {
@@ -57,18 +44,10 @@ export default function SidebarFilters({
     onFilterChange({ ...activeFilters, selectedSources: newSources });
   };
 
-  const toggleCategory = (category: NewsCategory) => {
-    const newCategories = activeFilters.selectedCategories.includes(category)
-      ? activeFilters.selectedCategories.filter((c) => c !== category)
-      : [...activeFilters.selectedCategories, category];
-    onFilterChange({ ...activeFilters, selectedCategories: newCategories });
-  };
-
   const clearAllFilters = () => {
     onFilterChange({
       searchQuery: '',
       selectedSources: [],
-      selectedCategories: [],
       selectedTags: [],
     });
   };
@@ -109,33 +88,6 @@ export default function SidebarFilters({
             />
           </div>
         </div>
-
-        {/* Categories Filter */}
-        {filterOptions.categories.length > 0 && (
-          <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">
-              Categories
-            </h3>
-            <div className="space-y-2">
-              {filterOptions.categories.map((category) => (
-                <label
-                  key={category}
-                  className="flex items-center space-x-2 cursor-pointer group"
-                >
-                  <input
-                    type="checkbox"
-                    checked={activeFilters.selectedCategories.includes(category)}
-                    onChange={() => toggleCategory(category)}
-                    className="w-4 h-4 border-2 border-gray-300 rounded text-black focus:ring-black focus:ring-offset-0"
-                  />
-                  <span className="text-sm text-gray-700 group-hover:text-black transition-colors">
-                    {CATEGORY_LABELS[category]}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Sources Filter */}
         {filterOptions.sources.length > 0 && (

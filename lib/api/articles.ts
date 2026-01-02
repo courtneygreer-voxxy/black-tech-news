@@ -20,14 +20,10 @@ export interface FeaturedArticleResponse {
 
 // Fetch all articles
 export async function fetchArticles(
-  limit: number = 50,
-  category?: string
+  limit: number = 50
 ): Promise<NewsArticle[]> {
   try {
     const params: Record<string, string> = { limit: limit.toString() };
-    if (category) {
-      params.category = category;
-    }
 
     const url = getApiUrl('/api/articles/list', params);
     const response = await fetch(url, {
