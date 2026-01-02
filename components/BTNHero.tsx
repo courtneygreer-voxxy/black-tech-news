@@ -15,10 +15,10 @@ export default function BTNHero() {
           {/* Headline */}
           <div>
             <h1 className="text-4xl md:text-5xl font-bold text-black leading-tight">
-              Black Tech News You Need to Know
+              Your Pulse on Black Innovation
             </h1>
             <p className="text-lg text-gray-600 mt-2">
-              Top articles in Black tech, curated daily
+              Celebrating Black excellence in technology, startups, and digital culture
             </p>
           </div>
         </div>

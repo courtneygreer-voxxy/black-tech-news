@@ -29,7 +29,7 @@ export async function fetchArticles(
       params.category = category;
     }
 
-    const url = getApiUrl('list', params);
+    const url = getApiUrl('/api/articles/list', params);
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -63,7 +63,7 @@ export async function fetchArticles(
 // Fetch featured article
 export async function fetchFeaturedArticle(): Promise<NewsArticle | null> {
   try {
-    const url = getApiUrl('featured');
+    const url = getApiUrl('/api/articles/featured');
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -100,7 +100,7 @@ export async function trackArticleView(
   source: string
 ): Promise<void> {
   try {
-    const url = getApiUrl('view');
+    const url = getApiUrl('/api/articles/view');
     const response = await fetch(url, {
       method: 'POST',
       headers: {
