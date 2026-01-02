@@ -27,6 +27,12 @@ export default function BTNFooter() {
           {/* Links */}
           <div className="flex items-center space-x-6">
             <a
+              href="mailto:staff@blacktechnews.cc"
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Contact
+            </a>
+            <a
               href="https://wolfdevelopmentstudio.com/terms"
               target="_blank"
               rel="noopener noreferrer"
