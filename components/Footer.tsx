@@ -20,14 +20,24 @@ export default function Footer() {
             <h3 className="text-lg font-bold mb-4">Resources</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+                <a
+                  href="https://wolfdevelopmentstudio.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
                   Privacy Policy
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
+                <a
+                  href="https://wolfdevelopmentstudio.com/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
                   Terms of Service
-                </Link>
+                </a>
               </li>
               <li>
                 <a

@@ -16,29 +16,34 @@ export default function BTNFooter() {
             </div>
             <div>
               <p className="text-sm text-gray-400">
-                © 2025 Black Tech News
+                © {new Date().getFullYear()} Wolf Development Studios LLC
               </p>
-              <a
-                href="https://www.wolfdevelopmentstudio.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-gray-500 hover:text-white transition-colors"
-              >
-                A Wolf Development Studio App
-              </a>
+              <p className="text-xs text-gray-500">
+                Black Tech News
+              </p>
             </div>
           </div>
 
           {/* Links */}
           <div className="flex items-center space-x-6">
-            <Link href="/terms" className="text-sm text-gray-400 hover:text-white transition-colors">
-                Terms
-            </Link>
-            <Link href="/privacy" className="text-sm text-gray-400 hover:text-white transition-colors">
-                Privacy
-            </Link>
             <a
-              href="https://www.wolfdevelopmentstudio.com"
+              href="https://wolfdevelopmentstudio.com/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Terms
+            </a>
+            <a
+              href="https://wolfdevelopmentstudio.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Privacy
+            </a>
+            <a
+              href="https://wolfdevelopmentstudio.com"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-gray-400 hover:text-white transition-colors"
