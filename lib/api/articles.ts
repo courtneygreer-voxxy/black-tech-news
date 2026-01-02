@@ -50,10 +50,26 @@ export async function fetchArticles(
     }
 
     // Convert date strings back to Date objects
-    return data.articles.map(article => ({
+    const articles = data.articles.map(article => ({
       ...article,
       publishedAt: new Date(article.publishedAt),
     }));
+
+    // Black Tech News custom sorting: prioritize articles with images
+    articles.sort((a, b) => {
+      const aHasImage = a.imageUrl ? 1 : 0;
+      const bHasImage = b.imageUrl ? 1 : 0;
+
+      // If one has image and other doesn't, prioritize the one with image
+      if (aHasImage !== bHasImage) {
+        return bHasImage - aHasImage;
+      }
+
+      // Both have images or both don't have images, sort by date
+      return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+    });
+
+    return articles;
   } catch (error) {
     console.error('Error fetching articles:', error);
     return [];
