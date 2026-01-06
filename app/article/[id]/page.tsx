@@ -6,9 +6,9 @@ import type { Metadata } from 'next';
 export async function generateStaticParams() {
   try {
     const articles = await fetchArticles(50);
-    // Next.js will automatically encode these when building URLs
+    // Return encoded IDs for static export to generate correct file paths
     return articles.map((article) => ({
-      id: article.id,
+      id: encodeURIComponent(article.id),
     }));
   } catch (error) {
     console.error('Error generating static params:', error);
