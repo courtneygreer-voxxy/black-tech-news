@@ -29,7 +29,10 @@ export default function ArticlePreviewClient({ articleId }: ArticlePreviewClient
   useEffect(() => {
     const loadArticle = async () => {
       try {
-        console.log('[ArticlePreview] Loading article with ID:', articleId);
+        console.log('[ArticlePreview] ===== LOADING ARTICLE =====');
+        console.log('[ArticlePreview] Received articleId:', articleId);
+        console.log('[ArticlePreview] ArticleId type:', typeof articleId);
+        console.log('[ArticlePreview] ArticleId length:', articleId.length);
 
         // Try to get from localStorage cache first
         const cached = localStorage.getItem('btn_articles');
@@ -37,10 +40,17 @@ export default function ArticlePreviewClient({ articleId }: ArticlePreviewClient
           const articles = JSON.parse(cached);
           console.log('[ArticlePreview] Found', articles.length, 'cached articles');
           console.log('[ArticlePreview] Looking for article ID:', articleId);
-          console.log('[ArticlePreview] Sample article IDs:', articles.slice(0, 3).map((a: any) => a.id));
+          console.log('[ArticlePreview] First 5 article IDs from cache:');
+          articles.slice(0, 5).forEach((a: any, idx: number) => {
+            console.log(`  [${idx}] ID: "${a.id}"`);
+            console.log(`  [${idx}] Match: ${a.id === articleId}`);
+          });
 
           const found = articles.find((a: any) => a.id === articleId);
           console.log('[ArticlePreview] Article found in cache:', !!found);
+          if (found) {
+            console.log('[ArticlePreview] Found article title:', found.title);
+          }
 
           if (found) {
             // Convert date string back to Date object

@@ -29,9 +29,16 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 // Server component wrapper
 export default async function ArticlePreviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  console.log('[Server] ===== ARTICLE PREVIEW PAGE =====');
+  console.log('[Server] Received ID from URL params:', id);
+  console.log('[Server] ID type:', typeof id);
+  console.log('[Server] ID length:', id.length);
+
   // Decode the URL-encoded ID to match the original article IDs
   const decodedId = decodeURIComponent(id);
-  console.log('[Server] Article preview page requested for ID:', id);
   console.log('[Server] Decoded ID:', decodedId);
+  console.log('[Server] Decoded ID length:', decodedId.length);
+  console.log('[Server] =====================================');
+
   return <ArticlePreviewClient articleId={decodedId} />;
 }
