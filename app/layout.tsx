@@ -89,19 +89,22 @@ export default function RootLayout({
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
 
-              // Set default consent to denied (privacy-first)
+              // Set default consent (analytics granted for news site, ads denied)
               gtag('consent', 'default', {
-                'analytics_storage': 'denied',
+                'analytics_storage': 'granted',
                 'ad_storage': 'denied',
                 'ad_user_data': 'denied',
-                'ad_personalization': 'denied',
-                'wait_for_update': 500
+                'ad_personalization': 'denied'
               });
 
               gtag('js', new Date());
               gtag('config', 'G-FMKD0JYBF8', {
                 'anonymize_ip': true,
-                'cookie_flags': 'SameSite=None;Secure'
+                'cookie_flags': 'SameSite=None;Secure',
+                'send_page_view': true,
+                'page_location': window.location.href,
+                'page_path': window.location.pathname,
+                'page_title': document.title
               });
             `,
           }}
