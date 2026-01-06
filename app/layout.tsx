@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import Script from 'next/script';
 import CookieConsentBanner from '@/components/CookieConsentBanner';
 
 export const metadata: Metadata = {
@@ -74,32 +75,37 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/* Google tag (gtag.js) - Privacy-First Setup */}
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-FMKD0JYBF8"></script>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-
-            // Set default consent to denied (privacy-first)
-            gtag('consent', 'default', {
-              'analytics_storage': 'denied',
-              'ad_storage': 'denied',
-              'ad_user_data': 'denied',
-              'ad_personalization': 'denied',
-              'wait_for_update': 500
-            });
-
-            gtag('js', new Date());
-            gtag('config', 'G-FMKD0JYBF8', {
-              'anonymize_ip': true,
-              'cookie_flags': 'SameSite=None;Secure'
-            });
-          `,
-        }}
-      />
       <body>
+        {/* Google tag (gtag.js) - Privacy-First Setup using Next.js Script */}
+        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-FMKD0JYBF8"
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+
+              // Set default consent to denied (privacy-first)
+              gtag('consent', 'default', {
+                'analytics_storage': 'denied',
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'wait_for_update': 500
+              });
+
+              gtag('js', new Date());
+              gtag('config', 'G-FMKD0JYBF8', {
+                'anonymize_ip': true,
+                'cookie_flags': 'SameSite=None;Secure'
+              });
+            `,
+          }}
+        />
         {children}
         <CookieConsentBanner />
       </body>

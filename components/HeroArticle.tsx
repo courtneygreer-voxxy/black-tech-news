@@ -1,8 +1,9 @@
 'use client';
 
 import { NewsArticle } from '@/lib/news/types';
-import { trackArticleView } from '@/lib/api/articles';
+import { trackArticleClick } from '@/lib/analytics';
 import { format } from 'date-fns';
+import Link from 'next/link';
 
 interface HeroArticleProps {
   article: NewsArticle;
@@ -10,17 +11,25 @@ interface HeroArticleProps {
 
 export default function HeroArticle({ article }: HeroArticleProps) {
   const handleClick = () => {
-    trackArticleView(article.url, article.title, article.source.name);
+    // Store scroll position for restoration
+    sessionStorage.setItem('btn_scroll_position', window.scrollY.toString());
+
+    // Track GA4 analytics
+    trackArticleClick({
+      articleTitle: article.title,
+      articleUrl: article.url,
+      source: article.source.name,
+      position: 1, // Hero article is always position 1
+      hasImage: !!article.imageUrl,
+    });
   };
 
   return (
-    <article className="group cursor-pointer" onClick={handleClick}>
-      <a
-        href={article.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block"
-      >
+    <Link
+      href={`/article/${encodeURIComponent(article.id)}`}
+      onClick={handleClick}
+      className="block group cursor-pointer"
+    >
         {/* Hero Image */}
         <div className="relative h-96 bg-gradient-to-br from-red-600 via-black to-green-600 rounded-lg overflow-hidden mb-6">
           {article.imageUrl ? (
@@ -111,7 +120,6 @@ export default function HeroArticle({ article }: HeroArticleProps) {
             </span>
           </div>
         </div>
-      </a>
-    </article>
+    </Link>
   );
 }

@@ -16,6 +16,11 @@ export const AnalyticsEvents = {
   ARTICLE_VIEW: 'article_view',
   ARTICLE_EXTERNAL_CLICK: 'article_external_click', // Click to source
 
+  // Preview Page Events (granular tracking)
+  PREVIEW_PAGE_VIEW: 'preview_page_view', // User lands on preview page
+  PREVIEW_PAGE_EXIT: 'preview_page_exit', // User leaves preview page
+  PREVIEW_TO_EXTERNAL: 'preview_to_external', // Click-through from preview to external
+
   // Scroll & Engagement
   SCROLL_DEPTH: 'scroll_depth',
   TIME_ON_PAGE: 'time_on_page',
@@ -73,6 +78,7 @@ export const trackExternalClick = (params: {
   articleUrl: string;
   source: string;
   destination: string;
+  timeOnPreviewPage?: number; // Optional: time spent on preview before clicking
 }) => {
   if (!isGtagAvailable()) return;
 
@@ -83,6 +89,7 @@ export const trackExternalClick = (params: {
     source_name: params.source,
     destination_url: params.destination,
     outbound_category: 'article_source', // Category for reporting
+    time_on_preview: params.timeOnPreviewPage || 0,
   });
 
   // Also track as external link
@@ -91,6 +98,16 @@ export const trackExternalClick = (params: {
     source_name: params.source,
     destination_url: params.destination,
   });
+
+  // If this came from a preview page, track the click-through
+  if (params.timeOnPreviewPage !== undefined) {
+    window.gtag('event', AnalyticsEvents.PREVIEW_TO_EXTERNAL, {
+      article_title: params.articleTitle,
+      article_url: params.articleUrl,
+      source_name: params.source,
+      time_on_preview: params.timeOnPreviewPage,
+    });
+  }
 };
 
 // Track Scroll Depth
@@ -237,4 +254,148 @@ export const useScrollDepth = () => {
   return () => {
     window.removeEventListener('scroll', handleScroll);
   };
+};
+
+// Track Preview Page View (when user lands on article preview page)
+export const trackPreviewPageView = (params: {
+  articleId: string;
+  articleTitle: string;
+  articleUrl: string;
+  source: string;
+  category: string;
+  author: string;
+  hasImage: boolean;
+}) => {
+  if (!isGtagAvailable()) return;
+
+  window.gtag('event', AnalyticsEvents.PREVIEW_PAGE_VIEW, {
+    article_id: params.articleId,
+    article_title: params.articleTitle,
+    article_url: params.articleUrl,
+    source_name: params.source,
+    category: params.category,
+    author: params.author,
+    has_image: params.hasImage,
+    page_type: 'preview',
+  });
+
+  // Also track as page view
+  window.gtag('event', AnalyticsEvents.PAGE_VIEW, {
+    page_path: `/article/${params.articleId}`,
+    page_title: params.articleTitle,
+    page_type: 'preview',
+  });
+};
+
+// Track Preview Page Exit (when user leaves preview page)
+export const trackPreviewPageExit = (params: {
+  articleId: string;
+  articleTitle: string;
+  timeOnPage: number; // Time in seconds
+}) => {
+  if (!isGtagAvailable()) return;
+
+  window.gtag('event', AnalyticsEvents.PREVIEW_PAGE_EXIT, {
+    article_id: params.articleId,
+    article_title: params.articleTitle,
+    time_on_page: params.timeOnPage,
+    time_on_page_minutes: Math.floor(params.timeOnPage / 60),
+  });
+};
+
+// ===== UTM Parameter Utilities =====
+
+/**
+ * Append UTM parameters to a URL for tracking outbound traffic
+ * This allows partner sites to see that traffic came from Black Tech News
+ */
+export const appendUTMParams = (
+  url: string,
+  params?: {
+    source?: string;
+    medium?: string;
+    campaign?: string;
+    content?: string;
+    term?: string;
+  }
+): string => {
+  try {
+    const urlObj = new URL(url);
+
+    // Default UTM parameters for Black Tech News
+    const defaultParams = {
+      utm_source: params?.source || 'blacktechnews',
+      utm_medium: params?.medium || 'referral',
+      utm_campaign: params?.campaign || 'article_referral',
+    };
+
+    // Add optional parameters if provided
+    if (params?.content) {
+      urlObj.searchParams.set('utm_content', params.content);
+    }
+    if (params?.term) {
+      urlObj.searchParams.set('utm_term', params.term);
+    }
+
+    // Set default parameters
+    Object.entries(defaultParams).forEach(([key, value]) => {
+      urlObj.searchParams.set(key, value);
+    });
+
+    return urlObj.toString();
+  } catch (error) {
+    console.error('Error appending UTM parameters:', error);
+    return url; // Return original URL if there's an error
+  }
+};
+
+/**
+ * Extract UTM parameters from the current URL
+ * Used to track how users are finding the site
+ */
+export const getUTMParams = (): {
+  source?: string;
+  medium?: string;
+  campaign?: string;
+  content?: string;
+  term?: string;
+} | null => {
+  if (typeof window === 'undefined') return null;
+
+  const params = new URLSearchParams(window.location.search);
+  const utmParams: any = {};
+
+  // Extract all UTM parameters
+  ['source', 'medium', 'campaign', 'content', 'term'].forEach((param) => {
+    const value = params.get(`utm_${param}`);
+    if (value) {
+      utmParams[param] = value;
+    }
+  });
+
+  return Object.keys(utmParams).length > 0 ? utmParams : null;
+};
+
+/**
+ * Track inbound UTM parameters (how users found the site)
+ * Should be called on page load
+ */
+export const trackInboundUTM = () => {
+  if (!isGtagAvailable()) return;
+
+  const utmParams = getUTMParams();
+
+  if (utmParams) {
+    window.gtag('event', 'inbound_traffic', {
+      utm_source: utmParams.source,
+      utm_medium: utmParams.medium,
+      utm_campaign: utmParams.campaign,
+      utm_content: utmParams.content,
+      utm_term: utmParams.term,
+      referrer: document.referrer || 'direct',
+    });
+
+    // Store in session storage for attribution across page views
+    sessionStorage.setItem('btn_utm_params', JSON.stringify(utmParams));
+  }
 };

@@ -1,8 +1,8 @@
 'use client';
 
 import { NewsArticle } from '@/lib/news/types';
-import { trackArticleView } from '@/lib/api/articles';
-import { trackArticleClick, trackExternalClick } from '@/lib/analytics';
+import { trackArticleClick } from '@/lib/analytics';
+import Link from 'next/link';
 
 interface ArticleCardProps {
   article: NewsArticle;
@@ -15,10 +15,10 @@ export default function ArticleCard({
   featured = false,
   position = 0,
 }: ArticleCardProps) {
-  // Track article click with comprehensive analytics
+  // Track article card click
   const handleClick = () => {
-    // Track internal view count (Wolf Studio API)
-    trackArticleView(article.url, article.title, article.source.name);
+    // Store scroll position for restoration
+    sessionStorage.setItem('btn_scroll_position', window.scrollY.toString());
 
     // Track GA4 analytics
     trackArticleClick({
@@ -28,22 +28,12 @@ export default function ArticleCard({
       position,
       hasImage: !!article.imageUrl,
     });
-
-    // Track outbound click (traffic to partner sites)
-    trackExternalClick({
-      articleTitle: article.title,
-      articleUrl: article.url,
-      source: article.source.name,
-      destination: article.url, // The external source URL
-    });
   };
 
   if (featured) {
     return (
-      <a
-        href={article.url}
-        target="_blank"
-        rel="noopener noreferrer"
+      <Link
+        href={`/article/${encodeURIComponent(article.id)}`}
         onClick={handleClick}
         className="block group"
       >
@@ -108,15 +98,13 @@ export default function ArticleCard({
             )}
           </div>
         </article>
-      </a>
+      </Link>
     );
   }
 
   return (
-    <a
-      href={article.url}
-      target="_blank"
-      rel="noopener noreferrer"
+    <Link
+      href={`/article/${encodeURIComponent(article.id)}`}
       onClick={handleClick}
       className="block group"
     >
@@ -171,6 +159,6 @@ export default function ArticleCard({
           </div>
         </div>
       </article>
-    </a>
+    </Link>
   );
 }

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import BTNNavbar from '@/components/BTNNavbar';
-import BTNHero from '@/components/BTNHero';
 import BTNFooter from '@/components/BTNFooter';
 import ArticleCard from '@/components/ArticleCard';
 import HeroArticle from '@/components/HeroArticle';
@@ -11,7 +10,7 @@ import Pagination from '@/components/Pagination';
 import StructuredData from '@/components/StructuredData';
 import { NewsArticle } from '@/lib/news/types';
 import { fetchArticles } from '@/lib/api/articles';
-import { useScrollDepth, useTimeOnPage, trackFilterApplied, trackSearch } from '@/lib/analytics';
+import { useScrollDepth, useTimeOnPage, trackFilterApplied, trackSearch, trackInboundUTM } from '@/lib/analytics';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -27,10 +26,13 @@ export default function HomePage() {
     selectedTags: [],
   });
 
-  // Analytics: Track scroll depth and time on page
+  // Analytics: Track scroll depth, time on page, and inbound UTM parameters
   useEffect(() => {
     const cleanupScroll = useScrollDepth();
     const cleanupTime = useTimeOnPage();
+
+    // Track inbound UTM parameters (how users found the site)
+    trackInboundUTM();
 
     return () => {
       if (cleanupScroll) cleanupScroll();
@@ -219,7 +221,6 @@ export default function HomePage() {
         isRefreshing={isRefreshing}
         lastRefresh={lastRefresh}
       />
-      <BTNHero />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-8 lg:px-16 py-12">
