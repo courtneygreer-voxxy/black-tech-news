@@ -2,6 +2,7 @@
 
 import { NewsArticle } from '@/lib/news/types';
 import { trackArticleClick } from '@/lib/analytics';
+import { encodeArticleId } from '@/lib/utils';
 import { format } from 'date-fns';
 import Link from 'next/link';
 
@@ -26,7 +27,7 @@ export default function HeroArticle({ article }: HeroArticleProps) {
 
   return (
     <Link
-      href={`/article/${encodeURIComponent(article.id)}`}
+      href={`/article/${encodeArticleId(article.id)}`}
       onClick={handleClick}
       className="block group cursor-pointer"
     >

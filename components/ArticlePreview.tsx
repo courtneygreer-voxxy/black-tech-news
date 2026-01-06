@@ -6,6 +6,7 @@ import { ArrowLeft, ExternalLink, Share2 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { appendUTMParams } from '@/lib/analytics';
+import { encodeArticleId } from '@/lib/utils';
 
 interface ArticlePreviewProps {
   article: NewsArticle;
@@ -206,7 +207,7 @@ export default function ArticlePreview({
             {relatedArticles.map((related) => (
               <Link
                 key={related.id}
-                href={`/article/${encodeURIComponent(related.id)}`}
+                href={`/article/${encodeArticleId(related.id)}`}
                 className="group"
                 onClick={() => {
                   // Store scroll position before navigating

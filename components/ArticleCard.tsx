@@ -2,6 +2,7 @@
 
 import { NewsArticle } from '@/lib/news/types';
 import { trackArticleClick } from '@/lib/analytics';
+import { encodeArticleId } from '@/lib/utils';
 import Link from 'next/link';
 
 interface ArticleCardProps {
@@ -33,7 +34,7 @@ export default function ArticleCard({
   if (featured) {
     return (
       <Link
-        href={`/article/${encodeURIComponent(article.id)}`}
+        href={`/article/${encodeArticleId(article.id)}`}
         onClick={handleClick}
         className="block group"
       >
@@ -104,7 +105,7 @@ export default function ArticleCard({
 
   return (
     <Link
-      href={`/article/${encodeURIComponent(article.id)}`}
+      href={`/article/${encodeArticleId(article.id)}`}
       onClick={handleClick}
       className="block group"
     >
