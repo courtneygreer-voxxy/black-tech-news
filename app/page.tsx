@@ -40,7 +40,7 @@ export default function HomePage() {
     };
   }, []);
 
-  // Load cached data from localStorage on mount
+  // Load cached data from localStorage on mount (synchronously for instant display)
   useEffect(() => {
     const cached = localStorage.getItem('btn_articles');
     const cachedTime = localStorage.getItem('btn_last_refresh');
@@ -55,9 +55,19 @@ export default function HomePage() {
         }));
         setArticles(articlesWithDates);
         setLastRefresh(new Date(cachedTime));
+        setLoading(false); // Show cached content immediately
       } catch (error) {
         console.error('Error loading cached articles:', error);
       }
+    }
+
+    // Check if we need to fetch fresh data in background
+    const shouldFetch = !cachedTime ||
+      (Date.now() - new Date(cachedTime).getTime() > 5 * 60 * 1000); // 5 minutes
+
+    if (shouldFetch) {
+      // Fetch in background without showing loading state
+      loadArticles(true);
     }
   }, []);
 
@@ -87,19 +97,6 @@ export default function HomePage() {
       setIsRefreshing(false);
     }
   };
-
-  // Initial fetch on mount (if no cache or cache is old)
-  useEffect(() => {
-    const cachedTime = localStorage.getItem('btn_last_refresh');
-    const shouldFetch = !cachedTime ||
-      (Date.now() - new Date(cachedTime).getTime() > 5 * 60 * 1000); // 5 minutes
-
-    if (shouldFetch) {
-      loadArticles();
-    } else {
-      setLoading(false);
-    }
-  }, []);
 
   // Extract dynamic filter options from loaded articles
   const filterOptions = useMemo<FilterOptions>(() => {

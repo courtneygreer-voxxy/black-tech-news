@@ -57,12 +57,18 @@ export async function fetchArticles(
       return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
     });
 
+    // Filter for fresh articles (within last 7 days) for first page
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const recentArticles = articles.filter(a => new Date(a.publishedAt) >= sevenDaysAgo);
+    const olderArticles = articles.filter(a => new Date(a.publishedAt) < sevenDaysAgo);
+
     // Apply smart sorting: ensure first page (10 items) has mix of images and rotation
     const firstPageSize = 10;
-    if (articles.length > firstPageSize) {
-      // Separate articles with and without images
-      const withImages = articles.filter(a => a.imageUrl);
-      const withoutImages = articles.filter(a => !a.imageUrl);
+    if (recentArticles.length >= firstPageSize) {
+      // Use only recent articles for first page
+      const withImages = recentArticles.filter(a => a.imageUrl);
+      const withoutImages = recentArticles.filter(a => !a.imageUrl);
 
       // For first page: aim for 50% images, but ensure daily rotation
       // Use date as seed for consistent daily rotation
@@ -70,7 +76,7 @@ export async function fetchArticles(
       const seed = today.split('-').reduce((acc, val) => acc + parseInt(val), 0);
 
       // Sort with images by date, then apply rotation offset based on day
-      const rotationOffset = seed % Math.min(withImages.length, firstPageSize);
+      const rotationOffset = seed % Math.max(1, Math.min(withImages.length, firstPageSize));
       const rotatedWithImages = [
         ...withImages.slice(rotationOffset),
         ...withImages.slice(0, rotationOffset),
@@ -85,14 +91,17 @@ export async function fetchArticles(
         ...withoutImages.slice(0, targetNoImagesCount),
       ].slice(0, firstPageSize);
 
-      // Remaining articles stay in date order
+      // Remaining recent articles + older articles stay in date order
       const remainingWithImages = rotatedWithImages.slice(targetImagesCount);
       const remainingWithoutImages = withoutImages.slice(targetNoImagesCount);
 
-      const remainingArticles = [...remainingWithImages, ...remainingWithoutImages]
+      const remainingRecentArticles = [...remainingWithImages, ...remainingWithoutImages]
         .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
-      return [...firstPageArticles, ...remainingArticles];
+      return [...firstPageArticles, ...remainingRecentArticles, ...olderArticles];
+    } else if (recentArticles.length > 0) {
+      // Not enough recent articles for full first page, use what we have + older ones
+      return [...recentArticles, ...olderArticles];
     }
 
     return articles;
