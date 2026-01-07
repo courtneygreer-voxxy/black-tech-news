@@ -22,22 +22,39 @@ const BLACK_TECH_KEYWORDS = [
   'minority tech professionals',
 ];
 
-// Category to SEO keyword mapping
+// Education-focused keywords targeting HBCUs and young professionals
+const EDUCATION_KEYWORDS = [
+  'tech careers for students',
+  'HBCU tech opportunities',
+  'Black tech professionals',
+  'career advice for graduates',
+  'tech industry trends',
+  'internship opportunities',
+  'professional development',
+  'tech jobs for new graduates',
+  'career resources',
+  'tech industry insights',
+  'STEM careers',
+  'young professionals in tech',
+];
+
+// Category to SEO keyword mapping (enhanced for educational institutions)
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  'ai-ml': ['artificial intelligence', 'machine learning', 'AI innovation', 'ML technology', 'neural networks'],
-  'startups': ['startup funding', 'venture capital', 'entrepreneurship', 'tech startups', 'seed funding'],
-  'innovation': ['tech innovation', 'breakthrough technology', 'emerging tech', 'cutting-edge'],
-  'diversity': ['diversity and inclusion', 'tech equity', 'representation in tech', 'inclusive technology'],
-  'careers': ['tech careers', 'job opportunities', 'career development', 'tech hiring', 'professional growth'],
-  'funding': ['investment', 'venture capital', 'funding rounds', 'startup capital', 'tech investment'],
-  'leadership': ['tech leadership', 'executive leadership', 'C-suite', 'tech executives', 'industry leaders'],
-  'products': ['product launches', 'new technology', 'tech products', 'product innovation'],
-  'culture': ['tech culture', 'workplace culture', 'digital culture', 'tech community'],
-  'education': ['tech education', 'STEM education', 'coding bootcamps', 'tech training', 'computer science'],
+  'ai-ml': ['artificial intelligence careers', 'machine learning jobs', 'AI innovation', 'ML technology', 'AI career paths'],
+  'startups': ['startup opportunities', 'venture capital', 'entrepreneurship for students', 'Black-founded startups', 'startup careers'],
+  'innovation': ['tech innovation', 'breakthrough technology', 'emerging tech careers', 'cutting-edge technology'],
+  'diversity': ['diversity and inclusion', 'tech equity', 'representation in tech', 'inclusive workplaces', 'DEI careers'],
+  'careers': ['tech careers', 'job opportunities', 'career development', 'tech hiring', 'professional growth', 'entry-level tech jobs'],
+  'funding': ['investment news', 'venture capital', 'funding rounds', 'startup funding', 'Black founders investment'],
+  'leadership': ['tech leadership', 'career advancement', 'tech executives', 'industry leaders', 'leadership development'],
+  'products': ['product launches', 'new technology', 'tech products', 'product innovation', 'tech trends'],
+  'culture': ['tech culture', 'workplace culture', 'digital culture', 'tech community', 'company culture'],
+  'education': ['tech education', 'STEM education', 'coding bootcamps', 'tech training', 'computer science degrees', 'HBCU tech programs'],
 };
 
 /**
  * Extract relevant keywords from article content
+ * Enhanced with education-focused keywords for HBCU and student targeting
  */
 export function extractKeywords(article: NewsArticle): string[] {
   const keywords = new Set<string>();
@@ -49,10 +66,19 @@ export function extractKeywords(article: NewsArticle): string[] {
   // Add article tags (already curated)
   article.tags.forEach(tag => keywords.add(tag));
 
+  // Add education-focused keywords for student/HBCU targeting (2-3 per article)
+  const educationCategories = ['careers', 'startups', 'leadership', 'innovation', 'education', 'funding'];
+  if (educationCategories.includes(article.category)) {
+    const randomEducationKeywords = EDUCATION_KEYWORDS
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 3);
+    randomEducationKeywords.forEach(kw => keywords.add(kw));
+  }
+
   // Add some general Black tech keywords
   const randomBlackTechKeywords = BLACK_TECH_KEYWORDS
     .sort(() => 0.5 - Math.random())
-    .slice(0, 3);
+    .slice(0, 2);
   randomBlackTechKeywords.forEach(kw => keywords.add(kw));
 
   // Extract key phrases from title (words longer than 4 chars)
@@ -68,6 +94,7 @@ export function extractKeywords(article: NewsArticle): string[] {
 
 /**
  * Generate SEO-optimized title with variations
+ * Enhanced for educational institution targeting
  */
 export function generateSEOTitle(article: NewsArticle): string {
   const categoryLabels: Record<string, string> = {
@@ -83,13 +110,28 @@ export function generateSEOTitle(article: NewsArticle): string {
     'education': 'Education',
   };
 
-  const categoryLabel = categoryLabels[article.category] || 'Tech News';
+  // Education-focused suffixes for relevant categories
+  const educationSuffixes: Record<string, string> = {
+    'careers': 'Tech Careers',
+    'startups': 'Startup News',
+    'leadership': 'Career Insights',
+    'innovation': 'Tech Trends',
+    'education': 'STEM Education',
+    'funding': 'Startup Funding',
+  };
 
-  // Create variations based on title length
+  const categoryLabel = categoryLabels[article.category] || 'Tech News';
+  const educationLabel = educationSuffixes[article.category];
+
+  // Create variations based on title length and category
   const baseTitle = article.title;
   const maxTitleLength = 60; // SEO best practice
 
   if (baseTitle.length <= maxTitleLength) {
+    // For education-relevant categories, use student-focused suffix
+    if (educationLabel) {
+      return `${baseTitle} | ${educationLabel} - Black Tech News`;
+    }
     // Short titles: add category and brand
     return `${baseTitle} | ${categoryLabel} - Black Tech News`;
   } else {
@@ -100,6 +142,7 @@ export function generateSEOTitle(article: NewsArticle): string {
 
 /**
  * Generate unique, SEO-optimized meta description
+ * Enhanced with student and young professional messaging
  */
 export function generateMetaDescription(article: NewsArticle): string {
   const maxLength = 155; // SEO best practice
@@ -107,21 +150,21 @@ export function generateMetaDescription(article: NewsArticle): string {
   // Extract first sentence from excerpt or first 150 chars
   let description = article.excerpt || article.content || article.title;
 
-  // Add context and keywords
+  // Add context and keywords (enhanced for education targeting)
   const categoryContext: Record<string, string> = {
-    'ai-ml': 'Explore the latest in artificial intelligence and machine learning',
-    'startups': 'Discover innovative Black-founded startups and entrepreneurship',
-    'innovation': 'Stay updated on groundbreaking technology and innovation',
-    'diversity': 'Learn about diversity, equity, and inclusion in tech',
-    'careers': 'Find opportunities and insights for tech career growth',
-    'funding': 'Track venture capital and startup funding in Black tech',
-    'leadership': 'Follow Black tech leaders shaping the industry',
-    'products': 'Discover new tech products and launches',
-    'culture': 'Explore tech culture and digital innovation',
-    'education': 'Access tech education resources and STEM opportunities',
+    'ai-ml': 'Essential tech news for students and professionals: Explore AI and machine learning',
+    'startups': 'Career insights for aspiring founders: Discover innovative Black-founded startups',
+    'innovation': 'Tech trends for young professionals: Stay updated on groundbreaking technology',
+    'diversity': 'Building inclusive careers: Learn about diversity, equity, and inclusion in tech',
+    'careers': 'Career resources for tech students: Find opportunities and insights for growth',
+    'funding': 'Startup funding news for entrepreneurs: Track venture capital in Black tech',
+    'leadership': 'Professional development insights: Follow Black tech leaders shaping the industry',
+    'products': 'Latest tech innovations: Discover new products and launches',
+    'culture': 'Tech workplace culture: Explore digital innovation and community',
+    'education': 'STEM education and career resources: Access opportunities for students',
   };
 
-  const context = categoryContext[article.category] || 'Stay informed about Black excellence in technology';
+  const context = categoryContext[article.category] || 'Essential tech news for students and young professionals in Black tech';
 
   // Combine context with excerpt
   const combined = `${context}. ${description}`;
