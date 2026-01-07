@@ -51,33 +51,6 @@ export default function BTNNavbar({ onRefresh, isRefreshing, lastRefresh }: BTNN
               </p>
             </div>
           </Link>
-
-          {/* Refresh Section */}
-          {onRefresh && (
-            <div className="flex items-center space-x-4">
-              <div className="hidden md:flex flex-col items-end">
-                <span className="text-xs text-gray-500 uppercase tracking-wide">
-                  Last Updated
-                </span>
-                <span className="text-sm font-medium text-gray-700">
-                  {formatLastRefresh(lastRefresh)}
-                </span>
-              </div>
-              <button
-                onClick={onRefresh}
-                disabled={isRefreshing}
-                className="flex items-center space-x-2 px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Refresh articles"
-              >
-                <RefreshCw
-                  className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`}
-                />
-                <span className="hidden sm:inline font-medium">
-                  {isRefreshing ? 'Refreshing...' : 'Refresh'}
-                </span>
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </nav>
