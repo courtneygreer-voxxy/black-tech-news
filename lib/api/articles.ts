@@ -51,19 +51,49 @@ export async function fetchArticles(
       publishedAt: new Date(article.publishedAt),
     }));
 
-    // Black Tech News custom sorting: prioritize articles with images
+    // Black Tech News smart sorting: balance images with daily rotation
     articles.sort((a, b) => {
-      const aHasImage = a.imageUrl ? 1 : 0;
-      const bHasImage = b.imageUrl ? 1 : 0;
-
-      // If one has image and other doesn't, prioritize the one with image
-      if (aHasImage !== bHasImage) {
-        return bHasImage - aHasImage;
-      }
-
-      // Both have images or both don't have images, sort by date
+      // First, sort by recency
       return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
     });
+
+    // Apply smart sorting: ensure first page (10 items) has mix of images and rotation
+    const firstPageSize = 10;
+    if (articles.length > firstPageSize) {
+      // Separate articles with and without images
+      const withImages = articles.filter(a => a.imageUrl);
+      const withoutImages = articles.filter(a => !a.imageUrl);
+
+      // For first page: aim for 50% images, but ensure daily rotation
+      // Use date as seed for consistent daily rotation
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      const seed = today.split('-').reduce((acc, val) => acc + parseInt(val), 0);
+
+      // Sort with images by date, then apply rotation offset based on day
+      const rotationOffset = seed % Math.min(withImages.length, firstPageSize);
+      const rotatedWithImages = [
+        ...withImages.slice(rotationOffset),
+        ...withImages.slice(0, rotationOffset),
+      ];
+
+      // Take top 5 with images and top 5 without images for first page
+      const targetImagesCount = Math.min(5, rotatedWithImages.length);
+      const targetNoImagesCount = Math.min(5, withoutImages.length);
+
+      const firstPageArticles = [
+        ...rotatedWithImages.slice(0, targetImagesCount),
+        ...withoutImages.slice(0, targetNoImagesCount),
+      ].slice(0, firstPageSize);
+
+      // Remaining articles stay in date order
+      const remainingWithImages = rotatedWithImages.slice(targetImagesCount);
+      const remainingWithoutImages = withoutImages.slice(targetNoImagesCount);
+
+      const remainingArticles = [...remainingWithImages, ...remainingWithoutImages]
+        .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+
+      return [...firstPageArticles, ...remainingArticles];
+    }
 
     return articles;
   } catch (error) {
