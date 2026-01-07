@@ -18,7 +18,51 @@ export interface FeaturedArticleResponse {
   message?: string;
 }
 
-// Fetch all articles
+// Fetch all articles (for build-time SSG with caching)
+export async function fetchArticlesForBuild(
+  limit: number = 50
+): Promise<NewsArticle[]> {
+  try {
+    const params: Record<string, string> = { limit: limit.toString() };
+
+    const url = getApiUrl('/api/articles/list', params);
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Cache during build for SSG
+      cache: 'force-cache',
+      next: {
+        revalidate: 3600, // Revalidate every hour during build
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch articles: ${response.statusText}`);
+    }
+
+    const data: ArticlesResponse = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to fetch articles');
+    }
+
+    // Convert date strings back to Date objects
+    const articles = data.articles.map(article => ({
+      ...article,
+      publishedAt: new Date(article.publishedAt),
+    }));
+
+    // Apply same sorting logic as client-side
+    return articles;
+  } catch (error) {
+    console.error('Error fetching articles for build:', error);
+    return [];
+  }
+}
+
+// Fetch all articles (for client-side runtime)
 export async function fetchArticles(
   limit: number = 50
 ): Promise<NewsArticle[]> {
@@ -31,7 +75,7 @@ export async function fetchArticles(
       headers: {
         'Content-Type': 'application/json',
       },
-      // Enable caching for static export
+      // No caching for client-side (always fresh)
       cache: 'no-store',
     });
 
