@@ -20,17 +20,29 @@ Black Tech News is a premium news aggregator showcasing the latest innovations, 
 - **Real-time updates** from RSS feeds
 - **Clean, magazine-quality design** inspired by Vogue and TechCrunch
 
+### Weekly Digests
+- **Automated weekly summaries** published every Monday at 6:00 AM EST
+- **AI-generated themes** analyzing top stories and trends
+- **Educational focus** for students, professionals, and founders
+- **Archive building naturally** week-by-week
+
+### Monthly Reports
+- **"State of Black Tech"** comprehensive ecosystem analysis
+- **6 core sections**: Funding, Talent, Innovation, Community, Outlook
+- **Data visualizations** and sector breakdowns
+- **Published first Monday** of each month at 8:00 AM EST
+
 ### Pan-African Design
 - **Red, Black, Green color scheme** celebrating Pan-African heritage
 - **Professional typography** with modern styling
 - **Responsive layout** optimized for all devices
 - **Smooth animations** for enhanced user experience
 
-### Powered by Wolf Studio API
-- **Centralized content aggregation** via Wolf Development Studio backend
-- **Client-side customization** for Black Tech News-specific display preferences
-- **View tracking** and analytics
-- **Scalable architecture** for future features
+### SEO & Discoverability
+- **Education-focused metadata** targeting HBCUs and students
+- **AI-parseable structure** for LLM consumption
+- **Schema.org structured data** for rich search results
+- **Monthly citation velocity** for authority building
 
 ---
 
@@ -89,6 +101,12 @@ black-tech-news/
 ├── app/
 │   ├── layout.tsx              # Root layout with SEO metadata
 │   ├── page.tsx                # Homepage with article feed
+│   ├── weekly/
+│   │   ├── page.tsx            # Weekly digest archive
+│   │   └── [date]/page.tsx     # Individual weekly digest
+│   ├── monthly/
+│   │   ├── page.tsx            # Monthly report archive
+│   │   └── [date]/page.tsx     # Individual monthly report
 │   └── globals.css             # Global styles and animations
 ├── components/
 │   ├── BTNNavbar.tsx           # Navigation bar
@@ -100,9 +118,19 @@ black-tech-news/
 ├── lib/
 │   ├── api/
 │   │   └── articles.ts         # API integration & client-side sorting
+│   ├── weekly/
+│   │   ├── types.ts            # Weekly digest TypeScript types
+│   │   └── generator.ts        # Weekly digest generation logic
+│   ├── monthly/
+│   │   ├── types.ts            # Monthly report TypeScript types
+│   │   └── generator.ts        # Monthly report generation logic
 │   ├── config.ts               # API configuration
 │   └── news/
 │       └── types.ts            # TypeScript interfaces
+├── .github/
+│   └── workflows/
+│       ├── weekly-digest.yml   # Monday 6 AM automation
+│       └── monthly-report.yml  # First Monday automation
 ├── public/
 │   └── sources/                # Source logos
 ├── .env.local                  # Environment variables (not committed)
@@ -215,9 +243,13 @@ trackArticleView(articleUrl, articleTitle, sourceName);
 - [x] Pan-African design system
 - [x] Responsive layout
 - [x] Article view tracking
-- [x] Hero messaging
+- [x] Weekly digest automation (Mondays 6 AM EST)
+- [x] Monthly report automation (First Monday 8 AM EST)
+- [x] SEO optimization for education sector
+- [x] Privacy-first analytics system
 
 ### Coming Soon
+- [ ] Claude AI integration for theme analysis
 - [ ] User bookmarking (save articles)
 - [ ] Email newsletter sign-up
 - [ ] Social sharing enhancements
