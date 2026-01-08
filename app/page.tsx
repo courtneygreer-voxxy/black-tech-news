@@ -20,6 +20,8 @@ export default function HomePage() {
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showDailyPull, setShowDailyPull] = useState(false);
+  const [isPulling, setIsPulling] = useState(false);
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({
     searchQuery: '',
     selectedSources: [],
@@ -44,6 +46,13 @@ export default function HomePage() {
   useEffect(() => {
     const cached = localStorage.getItem('btn_articles');
     const cachedTime = localStorage.getItem('btn_last_refresh');
+    const lastPullDate = localStorage.getItem('btn_last_pull_date');
+    const today = new Date().toDateString();
+
+    // Check if cache is very stale (more than 6 hours old) or it's a new day
+    const cacheAge = cachedTime ? Date.now() - new Date(cachedTime).getTime() : Infinity;
+    const isStaleCache = cacheAge > 6 * 60 * 60 * 1000; // 6 hours
+    const isNewDay = lastPullDate !== today;
 
     if (cached && cachedTime) {
       try {
@@ -53,21 +62,33 @@ export default function HomePage() {
           ...article,
           publishedAt: new Date(article.publishedAt),
         }));
-        setArticles(articlesWithDates);
-        setLastRefresh(new Date(cachedTime));
-        setLoading(false); // Show cached content immediately
+
+        // If it's a new day and cache is stale, show the daily pull feature
+        if (isNewDay && isStaleCache) {
+          setShowDailyPull(true);
+          setLoading(false);
+        } else {
+          // Show cached content immediately
+          setArticles(articlesWithDates);
+          setLastRefresh(new Date(cachedTime));
+          setLoading(false);
+
+          // Check if we need to fetch fresh data in background
+          const shouldFetch = cacheAge > 5 * 60 * 1000; // 5 minutes
+
+          if (shouldFetch) {
+            // Fetch in background without showing loading state
+            loadArticles(true);
+          }
+        }
       } catch (error) {
         console.error('Error loading cached articles:', error);
+        setLoading(false);
       }
-    }
-
-    // Check if we need to fetch fresh data in background
-    const shouldFetch = !cachedTime ||
-      (Date.now() - new Date(cachedTime).getTime() > 5 * 60 * 1000); // 5 minutes
-
-    if (shouldFetch) {
-      // Fetch in background without showing loading state
-      loadArticles(true);
+    } else {
+      // No cache at all - show daily pull feature
+      setShowDailyPull(true);
+      setLoading(false);
     }
   }, []);
 
@@ -95,6 +116,41 @@ export default function HomePage() {
     } finally {
       setLoading(false);
       setIsRefreshing(false);
+    }
+  };
+
+  // Handle daily pull - fetch today's top stories
+  const handleDailyPull = async () => {
+    setIsPulling(true);
+    setShowDailyPull(false);
+
+    // Track analytics for daily pull engagement
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', 'daily_stories_pull', {
+        event_category: 'engagement',
+        event_label: 'morning_ritual',
+        value: 1,
+      });
+    }
+
+    try {
+      const data = await fetchArticles(50);
+      setArticles(data);
+
+      // Update timestamps
+      const now = new Date();
+      setLastRefresh(now);
+
+      // Cache articles and mark today as pulled
+      localStorage.setItem('btn_articles', JSON.stringify(data));
+      localStorage.setItem('btn_last_refresh', now.toISOString());
+      localStorage.setItem('btn_last_pull_date', now.toDateString());
+    } catch (error) {
+      console.error('Error pulling daily stories:', error);
+      // On error, show regular loading
+      setShowDailyPull(false);
+    } finally {
+      setIsPulling(false);
     }
   };
 
@@ -252,6 +308,72 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        ) : showDailyPull ? (
+          <div className="flex items-center justify-center min-h-[600px]">
+            <div className="max-w-2xl w-full text-center">
+              {/* Pan-African Flag Animation */}
+              <div className="mb-8 flex justify-center">
+                <div className="relative w-64 h-64">
+                  {/* Animated colored bars */}
+                  <div className={`absolute inset-0 flex space-x-4 ${isPulling ? 'animate-pulse' : ''}`}>
+                    <div className={`flex-1 bg-red-600 rounded-lg transition-all duration-1000 ${isPulling ? 'scale-110' : 'scale-100'}`}></div>
+                    <div className={`flex-1 bg-black rounded-lg transition-all duration-1000 delay-100 ${isPulling ? 'scale-110' : 'scale-100'}`}></div>
+                    <div className={`flex-1 bg-green-600 rounded-lg transition-all duration-1000 delay-200 ${isPulling ? 'scale-110' : 'scale-100'}`}></div>
+                  </div>
+
+                  {/* Center icon */}
+                  {!isPulling && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="bg-white rounded-full p-8 shadow-2xl">
+                        <svg className="w-16 h-16 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                        </svg>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Text Content */}
+              <h2 className="text-4xl font-bold text-black mb-4">
+                {isPulling ? 'Pulling Today\'s Stories...' : 'Good Morning! ☀️'}
+              </h2>
+
+              {!isPulling ? (
+                <>
+                  <p className="text-xl text-gray-700 mb-8 leading-relaxed">
+                    Start your day with the latest Black tech news.<br />
+                    Click below to generate today's top stories.
+                  </p>
+
+                  <button
+                    onClick={handleDailyPull}
+                    className="group relative px-12 py-6 bg-gradient-to-r from-red-600 via-black to-green-600 text-white text-xl font-bold rounded-lg hover:scale-105 transition-all duration-300 shadow-2xl overflow-hidden"
+                  >
+                    {/* Animated shine effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-30 group-hover:animate-shimmer"></div>
+
+                    <span className="relative flex items-center justify-center space-x-3">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      <span>Pull Today's Top Stories</span>
+                    </span>
+                  </button>
+
+                  <p className="text-sm text-gray-500 mt-6">
+                    Join thousands of students, founders, and professionals starting their day informed.
+                  </p>
+                </>
+              ) : (
+                <div className="flex justify-center items-center space-x-2">
+                  <div className="w-3 h-3 bg-red-600 rounded-full animate-bounce"></div>
+                  <div className="w-3 h-3 bg-black rounded-full animate-bounce delay-100"></div>
+                  <div className="w-3 h-3 bg-green-600 rounded-full animate-bounce delay-200"></div>
+                </div>
+              )}
             </div>
           </div>
         ) : articles.length === 0 ? (

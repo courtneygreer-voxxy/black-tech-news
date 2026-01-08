@@ -25,7 +25,7 @@ export default function ArticlePreviewClient({ articleId }: ArticlePreviewClient
   const [loading, setLoading] = useState(true);
   const [pageViewStartTime] = useState(Date.now());
 
-  // Load article data
+  // Load article data with fallback for new articles not in build
   useEffect(() => {
     const loadArticle = async () => {
       try {
@@ -78,8 +78,11 @@ export default function ArticlePreviewClient({ articleId }: ArticlePreviewClient
           }
         }
 
-        // If not in cache, fetch fresh data
-        console.log('[ArticlePreview] Fetching fresh articles from API...');
+        // If not in cache, fetch fresh data from API
+        // This handles new articles that weren't in the build
+        console.log('[ArticlePreview] Article not in cache - fetching fresh from API...');
+        console.log('[ArticlePreview] This may be a new article not yet in build');
+
         const articles = await fetchArticles(50);
         console.log('[ArticlePreview] Fetched', articles.length, 'articles from API');
 
@@ -87,7 +90,12 @@ export default function ArticlePreviewClient({ articleId }: ArticlePreviewClient
         console.log('[ArticlePreview] Article found in API:', !!found);
 
         if (found) {
+          console.log('[ArticlePreview] Successfully loaded new article:', found.title);
           setArticle(found);
+
+          // Update cache with new articles including this one
+          localStorage.setItem('btn_articles', JSON.stringify(articles));
+          localStorage.setItem('btn_last_refresh', new Date().toISOString());
 
           // Find related articles from same source
           const related = articles
@@ -97,6 +105,8 @@ export default function ArticlePreviewClient({ articleId }: ArticlePreviewClient
             )
             .slice(0, 3);
           setRelatedArticles(related);
+        } else {
+          console.log('[ArticlePreview] Article not found in API either - may have been removed');
         }
       } catch (error) {
         console.error('Error loading article:', error);
@@ -184,16 +194,28 @@ export default function ArticlePreviewClient({ articleId }: ArticlePreviewClient
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white flex flex-col">
         <BTNNavbar onRefresh={() => {}} isRefreshing={false} lastRefresh={null} />
-        <div className="flex items-center justify-center py-32">
-          <div className="space-y-4 text-center">
-            <div className="flex justify-center space-x-2">
-              <div className="w-4 h-16 bg-red-600 animate-pulse"></div>
-              <div className="w-4 h-16 bg-black animate-pulse delay-75"></div>
-              <div className="w-4 h-16 bg-green-600 animate-pulse delay-150"></div>
+        <div className="flex-grow flex items-center justify-center py-32">
+          <div className="space-y-6 text-center max-w-lg">
+            {/* Animated loading bars */}
+            <div className="flex justify-center space-x-3">
+              <div className="w-6 h-20 bg-red-600 animate-pulse rounded"></div>
+              <div className="w-6 h-20 bg-black animate-pulse delay-75 rounded"></div>
+              <div className="w-6 h-20 bg-green-600 animate-pulse delay-150 rounded"></div>
             </div>
-            <p className="text-gray-600">Loading article...</p>
+
+            <h3 className="text-2xl font-bold text-black">Loading Article</h3>
+            <p className="text-gray-600 leading-relaxed">
+              Fetching the latest content for you...
+            </p>
+
+            {/* Skeleton content preview */}
+            <div className="mt-12 space-y-4">
+              <div className="h-64 bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg animate-pulse"></div>
+              <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+            </div>
           </div>
         </div>
         <BTNFooter />
@@ -203,19 +225,40 @@ export default function ArticlePreviewClient({ articleId }: ArticlePreviewClient
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white flex flex-col">
         <BTNNavbar onRefresh={() => {}} isRefreshing={false} lastRefresh={null} />
-        <div className="max-w-4xl mx-auto px-8 py-32 text-center">
-          <h1 className="text-4xl font-bold text-black mb-4">Article Not Found</h1>
-          <p className="text-gray-600 mb-8">
-            The article you're looking for doesn't exist or has been removed.
-          </p>
-          <button
-            onClick={handleBackClick}
-            className="px-6 py-3 bg-red-600 text-white font-bold hover:bg-red-700 transition-colors"
-          >
-            Back to Home
-          </button>
+        <div className="flex-grow flex items-center justify-center">
+          <div className="max-w-2xl mx-auto px-8 py-32 text-center">
+            {/* Pan-African flag bars */}
+            <div className="mb-8 flex justify-center space-x-4">
+              <div className="w-4 h-32 bg-red-600/30 rounded"></div>
+              <div className="w-4 h-32 bg-black/30 rounded"></div>
+              <div className="w-4 h-32 bg-green-600/30 rounded"></div>
+            </div>
+
+            <h1 className="text-4xl font-bold text-black mb-4">Article Not Found</h1>
+            <p className="text-xl text-gray-600 mb-4 leading-relaxed">
+              This article may have been removed or the link might be outdated.
+            </p>
+            <p className="text-gray-500 mb-8">
+              Don't worry—there's plenty of great Black tech news waiting for you on the homepage.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={handleBackClick}
+                className="px-8 py-4 bg-gray-200 text-black font-bold rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                ← Go Back
+              </button>
+              <button
+                onClick={() => router.push('/')}
+                className="px-8 py-4 bg-gradient-to-r from-red-600 via-black to-green-600 text-white font-bold rounded-lg hover:scale-105 transition-all"
+              >
+                Return to Homepage
+              </button>
+            </div>
+          </div>
         </div>
         <BTNFooter />
       </div>
