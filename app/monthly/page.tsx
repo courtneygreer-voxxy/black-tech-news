@@ -33,7 +33,10 @@ function getCurrentMonthReport() {
 }
 
 export default function MonthlyArchivePage() {
-  const currentReport = getCurrentMonthReport();
+  const today = new Date();
+  const dayOfMonth = today.getDate();
+  const showCurrentReport = dayOfMonth >= 28; // Only show after the 28th of each month
+  const currentReport = showCurrentReport ? getCurrentMonthReport() : null;
 
   return (
     <main className="min-h-screen bg-white">
@@ -88,62 +91,77 @@ export default function MonthlyArchivePage() {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-8 py-12">
-        {/* Current Month */}
+        {/* Current Month or Generating State */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold mb-8 flex items-center">
             <span className="w-1 h-8 bg-red-600 mr-4"></span>
             Latest Report
           </h2>
 
-          <Link
-            href={`/monthly/${currentReport.id}`}
-            className="block border-2 border-gray-200 rounded-lg p-8 hover:border-red-600 transition-all hover:shadow-xl"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <h3 className="text-3xl font-bold text-gray-900 mb-3">
-                  {currentReport.title}
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Published {currentReport.date.toLocaleDateString('en-US', {
-                    month: 'long',
-                    year: 'numeric'
-                  })}
-                </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-3 py-1 bg-red-100 text-red-800 text-sm font-medium rounded-full">
-                    Funding Analysis
-                  </span>
-                  <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
-                    Talent Trends
-                  </span>
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-                    Innovation
-                  </span>
-                  <span className="px-3 py-1 bg-purple-100 text-purple-800 text-sm font-medium rounded-full">
-                    Community Impact
-                  </span>
-                  <span className="px-3 py-1 bg-orange-100 text-orange-800 text-sm font-medium rounded-full">
-                    Outlook
-                  </span>
+          {currentReport ? (
+            <Link
+              href={`/monthly/${currentReport.id}`}
+              className="block border-2 border-gray-200 rounded-lg p-8 hover:border-red-600 transition-all hover:shadow-xl"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <h3 className="text-3xl font-bold text-gray-900 mb-3">
+                    {currentReport.title}
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Published {currentReport.date.toLocaleDateString('en-US', {
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="px-3 py-1 bg-red-100 text-red-800 text-sm font-medium rounded-full">
+                      Funding Analysis
+                    </span>
+                    <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
+                      Talent Trends
+                    </span>
+                    <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                      Innovation
+                    </span>
+                    <span className="px-3 py-1 bg-purple-100 text-purple-800 text-sm font-medium rounded-full">
+                      Community Impact
+                    </span>
+                    <span className="px-3 py-1 bg-orange-100 text-orange-800 text-sm font-medium rounded-full">
+                      Outlook
+                    </span>
+                  </div>
                 </div>
+                <span className="px-5 py-2 bg-red-600 text-white font-bold rounded-lg text-sm ml-4">
+                  LATEST
+                </span>
               </div>
-              <span className="px-5 py-2 bg-red-600 text-white font-bold rounded-lg text-sm ml-4">
-                LATEST
+              <p className="text-gray-700 mb-6 leading-relaxed">
+                Comprehensive analysis of this month's Black tech ecosystem: funding activity, career opportunities,
+                product launches, community initiatives, and forward-looking insights. Includes data visualizations,
+                sector breakdowns, and tailored guidance for students, professionals, and founders.
+              </p>
+              <span className="text-red-600 font-medium inline-flex items-center text-lg">
+                Read this month's report
+                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </span>
+            </Link>
+          ) : (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 bg-gray-50">
+              <div className="text-center">
+                <div className="text-6xl mb-4">⏳</div>
+                <h3 className="text-2xl font-bold mb-3">Report Generating</h3>
+                <p className="text-gray-600 mb-4 max-w-lg mx-auto">
+                  The monthly State of Black Tech report is currently being compiled. Reports are generated after the 28th of each month to ensure comprehensive data coverage.
+                </p>
+                <p className="text-sm text-gray-500">
+                  Check back on the first Monday of next month at 8:00 AM EST for the full report.
+                </p>
+              </div>
             </div>
-            <p className="text-gray-700 mb-6 leading-relaxed">
-              Comprehensive analysis of this month's Black tech ecosystem: funding activity, career opportunities,
-              product launches, community initiatives, and forward-looking insights. Includes data visualizations,
-              sector breakdowns, and tailored guidance for students, professionals, and founders.
-            </p>
-            <span className="text-red-600 font-medium inline-flex items-center text-lg">
-              Read this month's report
-              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </span>
-          </Link>
+          )}
         </section>
 
         {/* Coming Soon */}

@@ -12,9 +12,16 @@ interface MonthlyPageProps {
 
 // Generate static params for pre-rendering
 export async function generateStaticParams() {
-  // For now, generate just this month's report
-  // In production, this would generate last 6-12 months
+  // Only generate reports after the 28th of each month
   const today = new Date();
+  const dayOfMonth = today.getDate();
+
+  if (dayOfMonth < 28) {
+    // Before the 28th, don't generate any reports
+    return [];
+  }
+
+  // After the 28th, generate this month's report
   const reportId = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 
   return [
