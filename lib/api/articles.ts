@@ -95,7 +95,7 @@ export async function fetchArticles(
       publishedAt: new Date(article.publishedAt),
     }));
 
-    // Black Tech News smart sorting: balance images with daily rotation
+    // Black Tech News smart sorting: lock hero, rotate the rest
     articles.sort((a, b) => {
       // First, sort by recency
       return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
@@ -107,39 +107,50 @@ export async function fetchArticles(
     const recentArticles = articles.filter(a => new Date(a.publishedAt) >= sevenDaysAgo);
     const olderArticles = articles.filter(a => new Date(a.publishedAt) < sevenDaysAgo);
 
-    // Apply smart sorting: ensure first page (10 items) has mix of images and rotation
+    // Apply smart sorting: lock hero (position 0), rotate positions 1-9
     const firstPageSize = 10;
     if (recentArticles.length >= firstPageSize) {
-      // Use only recent articles for first page
+      // Separate articles with and without images
       const withImages = recentArticles.filter(a => a.imageUrl);
       const withoutImages = recentArticles.filter(a => !a.imageUrl);
 
-      // For first page: aim for 50% images, but ensure daily rotation
+      if (withImages.length === 0) {
+        // No images available, just return by date
+        return articles;
+      }
+
+      // HERO (Position 0): Lock newest article with image for 24 hours
+      const heroArticle = withImages[0]; // Always the newest article with an image
+      const remainingWithImages = withImages.slice(1); // Rest of articles with images
+
+      // For positions 1-9: Apply daily rotation
       // Use date as seed for consistent daily rotation
       const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
       const seed = today.split('-').reduce((acc, val) => acc + parseInt(val), 0);
 
-      // Sort with images by date, then apply rotation offset based on day
-      const rotationOffset = seed % Math.max(1, Math.min(withImages.length, firstPageSize));
+      // Rotate the remaining articles with images (positions 1+)
+      const rotationOffset = seed % Math.max(1, remainingWithImages.length);
       const rotatedWithImages = [
-        ...withImages.slice(rotationOffset),
-        ...withImages.slice(0, rotationOffset),
+        ...remainingWithImages.slice(rotationOffset),
+        ...remainingWithImages.slice(0, rotationOffset),
       ];
 
-      // Take top 5 with images and top 5 without images for first page
-      const targetImagesCount = Math.min(5, rotatedWithImages.length);
+      // Build first page: hero + mix of rotated images and no-images
+      // Aim for 5 with images (including hero) and 5 without
+      const targetRotatedImagesCount = Math.min(4, rotatedWithImages.length); // 4 more images after hero
       const targetNoImagesCount = Math.min(5, withoutImages.length);
 
       const firstPageArticles = [
-        ...rotatedWithImages.slice(0, targetImagesCount),
-        ...withoutImages.slice(0, targetNoImagesCount),
+        heroArticle, // Position 0: Locked hero
+        ...rotatedWithImages.slice(0, targetRotatedImagesCount), // Positions 1-4: Rotated images
+        ...withoutImages.slice(0, targetNoImagesCount), // Positions 5-9: Articles without images
       ].slice(0, firstPageSize);
 
       // Remaining recent articles + older articles stay in date order
-      const remainingWithImages = rotatedWithImages.slice(targetImagesCount);
+      const remainingRotatedImages = rotatedWithImages.slice(targetRotatedImagesCount);
       const remainingWithoutImages = withoutImages.slice(targetNoImagesCount);
 
-      const remainingRecentArticles = [...remainingWithImages, ...remainingWithoutImages]
+      const remainingRecentArticles = [...remainingRotatedImages, ...remainingWithoutImages]
         .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
       return [...firstPageArticles, ...remainingRecentArticles, ...olderArticles];
