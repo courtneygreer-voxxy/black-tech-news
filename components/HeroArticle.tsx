@@ -5,6 +5,7 @@ import { trackArticleClick } from '@/lib/analytics';
 import { encodeArticleId } from '@/lib/utils';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface HeroArticleProps {
   article: NewsArticle;
@@ -34,10 +35,14 @@ export default function HeroArticle({ article }: HeroArticleProps) {
         {/* Hero Image */}
         <div className="relative h-96 bg-gradient-to-br from-red-600 via-black to-green-600 rounded-lg overflow-hidden mb-6">
           {article.imageUrl ? (
-            <img
+            <Image
               src={article.imageUrl}
               alt={article.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              fill
+              priority
+              sizes="(max-width: 1280px) 100vw, 1280px"
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              unoptimized
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">

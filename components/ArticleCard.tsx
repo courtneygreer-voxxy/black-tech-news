@@ -4,6 +4,7 @@ import { NewsArticle } from '@/lib/news/types';
 import { trackArticleClick } from '@/lib/analytics';
 import { encodeArticleId } from '@/lib/utils';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface ArticleCardProps {
   article: NewsArticle;
@@ -42,10 +43,14 @@ export default function ArticleCard({
           {/* Featured Image */}
           <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
             {article.imageUrl ? (
-              <img
+              <Image
                 src={article.imageUrl}
                 alt={article.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                loading="lazy"
+                unoptimized
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
@@ -114,10 +119,14 @@ export default function ArticleCard({
           {/* Thumbnail */}
           <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden">
             {article.imageUrl ? (
-              <img
+              <Image
                 src={article.imageUrl}
                 alt={article.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                loading="lazy"
+                unoptimized
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">

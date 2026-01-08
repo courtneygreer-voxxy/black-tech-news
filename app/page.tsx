@@ -222,14 +222,36 @@ export default function HomePage() {
       {/* Main Content */}
       <main className="flex-grow max-w-7xl mx-auto px-8 lg:px-16 py-12 w-full">
         {loading ? (
-          <div className="flex items-center justify-center py-32">
-            <div className="space-y-4 text-center">
-              <div className="flex justify-center space-x-2">
-                <div className="w-4 h-16 bg-red-600 animate-pulse"></div>
-                <div className="w-4 h-16 bg-black animate-pulse delay-75"></div>
-                <div className="w-4 h-16 bg-green-600 animate-pulse delay-150"></div>
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Sidebar Skeleton */}
+            <div className="w-full lg:w-64 flex-shrink-0 space-y-6">
+              <div className="bg-gray-100 rounded-lg h-12 animate-pulse"></div>
+              <div className="space-y-3">
+                <div className="bg-gray-100 rounded h-8 animate-pulse"></div>
+                <div className="bg-gray-100 rounded h-8 animate-pulse"></div>
+                <div className="bg-gray-100 rounded h-8 animate-pulse"></div>
               </div>
-              <p className="text-gray-600">Loading the latest news...</p>
+            </div>
+
+            {/* Content Skeleton */}
+            <div className="flex-1 space-y-12">
+              {/* Hero Skeleton */}
+              <div className="space-y-4">
+                <div className="bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg h-96 animate-pulse"></div>
+                <div className="bg-gray-100 rounded h-8 w-3/4 animate-pulse"></div>
+                <div className="bg-gray-100 rounded h-6 w-1/2 animate-pulse"></div>
+              </div>
+
+              {/* Article Grid Skeleton */}
+              <div className="grid gap-8 md:grid-cols-2">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="space-y-3">
+                    <div className="bg-gray-200 rounded-lg aspect-[16/10] animate-pulse"></div>
+                    <div className="bg-gray-100 rounded h-6 w-full animate-pulse"></div>
+                    <div className="bg-gray-100 rounded h-4 w-3/4 animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         ) : articles.length === 0 ? (
