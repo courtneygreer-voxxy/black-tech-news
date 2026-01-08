@@ -74,8 +74,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className="h-full">
+      <body className="flex flex-col min-h-screen">
         {/* Google tag (gtag.js) - Privacy-First Setup using Next.js Script */}
         <Script
           strategy="afterInteractive"

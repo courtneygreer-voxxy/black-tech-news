@@ -209,7 +209,7 @@ export default function HomePage() {
     : paginatedArticles;
 
   return (
-    <div className="min-h-screen bg-white">
+    <>
       {/* SEO: Structured Data for GenAI Discovery */}
       {articles.length > 0 && <StructuredData articles={articles} />}
 
@@ -220,7 +220,7 @@ export default function HomePage() {
       />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-8 lg:px-16 py-12">
+      <main className="flex-grow max-w-7xl mx-auto px-8 lg:px-16 py-12 w-full">
         {loading ? (
           <div className="flex items-center justify-center py-32">
             <div className="space-y-4 text-center">
@@ -353,6 +353,6 @@ export default function HomePage() {
           Refresh articles
         </span>
       </button>
-    </div>
+    </>
   );
 }
