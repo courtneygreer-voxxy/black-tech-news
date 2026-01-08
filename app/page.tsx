@@ -122,7 +122,6 @@ export default function HomePage() {
   // Handle daily pull - fetch today's top stories
   const handleDailyPull = async () => {
     setIsPulling(true);
-    setShowDailyPull(false);
 
     // Track analytics for daily pull engagement
     if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -135,7 +134,10 @@ export default function HomePage() {
 
     try {
       const data = await fetchArticles(50);
+
+      // Only hide pull screen and show articles after data is loaded
       setArticles(data);
+      setShowDailyPull(false);
 
       // Update timestamps
       const now = new Date();
@@ -147,7 +149,7 @@ export default function HomePage() {
       localStorage.setItem('btn_last_pull_date', now.toDateString());
     } catch (error) {
       console.error('Error pulling daily stories:', error);
-      // On error, show regular loading
+      // On error, hide pull screen and show empty state
       setShowDailyPull(false);
     } finally {
       setIsPulling(false);
