@@ -14,40 +14,28 @@ export const metadata: Metadata = {
   },
 };
 
-// Generate list of weekly digests (last 8 weeks)
-function generateWeeklyDigestList() {
-  const digests = [];
+// Generate current week's digest
+function getCurrentWeekDigest() {
   const today = new Date();
+  const bounds = getWeekBounds(today);
+  const monday = new Date(bounds.weekStart);
+  monday.setDate(monday.getDate() + 1); // Sunday -> Monday
 
-  // Generate last 8 weeks
-  for (let i = 0; i < 8; i++) {
-    const weekDate = new Date(today);
-    weekDate.setDate(today.getDate() - (i * 7));
+  const dateStr = monday.toISOString().split('T')[0];
+  const startStr = bounds.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  const endStr = bounds.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
-    const bounds = getWeekBounds(weekDate);
-    const monday = new Date(bounds.weekStart);
-    monday.setDate(monday.getDate() + 1); // Sunday -> Monday
-
-    const dateStr = monday.toISOString().split('T')[0];
-    const startStr = bounds.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-    const endStr = bounds.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-
-    digests.push({
-      id: dateStr,
-      title: `Week of ${startStr} - ${endStr}`,
-      date: monday,
-      weekStart: bounds.weekStart,
-      weekEnd: bounds.weekEnd,
-    });
-  }
-
-  return digests;
+  return {
+    id: dateStr,
+    title: `Week of ${startStr} - ${endStr}`,
+    date: monday,
+    weekStart: bounds.weekStart,
+    weekEnd: bounds.weekEnd,
+  };
 }
 
 export default function WeeklyArchivePage() {
-  const digests = generateWeeklyDigestList();
-  const currentDigest = digests[0];
-  const pastDigests = digests.slice(1);
+  const currentDigest = getCurrentWeekDigest();
 
   return (
     <main className="min-h-screen bg-white">
@@ -117,41 +105,19 @@ export default function WeeklyArchivePage() {
           </Link>
         </section>
 
-        {/* Past Digests */}
+        {/* Coming Soon */}
         <section>
           <h2 className="text-3xl font-bold mb-8 flex items-center">
             <span className="w-1 h-8 bg-red-600 mr-4"></span>
             Past Digests
           </h2>
 
-          <div className="space-y-6">
-            {pastDigests.map((digest) => (
-              <Link
-                key={digest.id}
-                href={`/weekly/${digest.id}`}
-                className="block border border-gray-200 rounded-lg p-6 hover:border-red-600 transition-all hover:shadow-md"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {digest.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      Published {digest.date.toLocaleDateString('en-US', {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
-                    </p>
-                  </div>
-                  <span className="text-red-600">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </span>
-                </div>
-              </Link>
-            ))}
+          <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+            <div className="text-5xl mb-4">📅</div>
+            <h3 className="text-xl font-bold mb-3">Archive Building Weekly</h3>
+            <p className="text-gray-600 max-w-md mx-auto">
+              Past digests will appear here as they're published. Check back every Monday at 6:00 AM EST for new weekly summaries of Black tech news.
+            </p>
           </div>
         </section>
 

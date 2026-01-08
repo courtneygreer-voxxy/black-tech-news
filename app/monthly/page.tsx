@@ -13,36 +13,27 @@ export const metadata: Metadata = {
   },
 };
 
-// Generate list of monthly reports (last 6 months)
-function generateMonthlyReportList() {
-  const reports = [];
+// Generate current month's report
+function getCurrentMonthReport() {
   const today = new Date();
+  const monthDate = new Date(today.getFullYear(), today.getMonth(), 1);
+  const bounds = getMonthBounds(monthDate);
 
-  // Generate last 6 months
-  for (let i = 0; i < 6; i++) {
-    const monthDate = new Date(today.getFullYear(), today.getMonth() - i, 1);
-    const bounds = getMonthBounds(monthDate);
+  const reportId = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
+  const monthName = monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-    const reportId = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
-    const monthName = monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-
-    reports.push({
-      id: reportId,
-      title: `State of Black Tech: ${monthName}`,
-      monthName,
-      date: monthDate,
-      monthStart: bounds.monthStart,
-      monthEnd: bounds.monthEnd,
-    });
-  }
-
-  return reports;
+  return {
+    id: reportId,
+    title: `State of Black Tech: ${monthName}`,
+    monthName,
+    date: monthDate,
+    monthStart: bounds.monthStart,
+    monthEnd: bounds.monthEnd,
+  };
 }
 
 export default function MonthlyArchivePage() {
-  const reports = generateMonthlyReportList();
-  const currentReport = reports[0];
-  const pastReports = reports.slice(1);
+  const currentReport = getCurrentMonthReport();
 
   return (
     <main className="min-h-screen bg-white">
@@ -155,58 +146,21 @@ export default function MonthlyArchivePage() {
           </Link>
         </section>
 
-        {/* Past Reports */}
-        {pastReports.length > 0 && (
-          <section className="mb-16">
-            <h2 className="text-3xl font-bold mb-8 flex items-center">
-              <span className="w-1 h-8 bg-red-600 mr-4"></span>
-              Past Reports
-            </h2>
+        {/* Coming Soon */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold mb-8 flex items-center">
+            <span className="w-1 h-8 bg-red-600 mr-4"></span>
+            Past Reports
+          </h2>
 
-            <div className="space-y-6">
-              {pastReports.map((report) => (
-                <Link
-                  key={report.id}
-                  href={`/monthly/${report.id}`}
-                  className="block border border-gray-200 rounded-lg p-6 hover:border-red-600 transition-all hover:shadow-lg"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                        {report.title}
-                      </h3>
-                      <p className="text-gray-600 mb-3">
-                        Published {report.date.toLocaleDateString('en-US', {
-                          month: 'long',
-                          year: 'numeric'
-                        })}
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                          Executive Summary
-                        </span>
-                        <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                          5 Core Sections
-                        </span>
-                        <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                          Top 10 Stories
-                        </span>
-                        <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                          Data Analysis
-                        </span>
-                      </div>
-                    </div>
-                    <span className="text-red-600 ml-4">
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+          <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+            <div className="text-5xl mb-4">📊</div>
+            <h3 className="text-xl font-bold mb-3">Archive Building Monthly</h3>
+            <p className="text-gray-600 max-w-md mx-auto">
+              Past reports will appear here as they're published. Check back on the first Monday of each month at 8:00 AM EST for comprehensive State of Black Tech analysis.
+            </p>
+          </div>
+        </section>
 
         {/* Who Should Read */}
         <section className="mb-16 bg-gradient-to-br from-gray-50 to-white rounded-lg p-8 border border-gray-200">
