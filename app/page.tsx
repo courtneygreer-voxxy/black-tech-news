@@ -8,6 +8,7 @@ import HeroArticle from '@/components/HeroArticle';
 import SidebarFilters, { ActiveFilters, FilterOptions } from '@/components/SidebarFilters';
 import Pagination from '@/components/Pagination';
 import StructuredData from '@/components/StructuredData';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { NewsArticle } from '@/lib/news/types';
 import { fetchArticles } from '@/lib/api/articles';
 import { useScrollDepth, useTimeOnPage, trackFilterApplied, trackSearch, trackInboundUTM } from '@/lib/analytics';
@@ -267,7 +268,7 @@ export default function HomePage() {
     : paginatedArticles;
 
   return (
-    <>
+    <ErrorBoundary>
       {/* SEO: Structured Data for GenAI Discovery */}
       {articles.length > 0 && <StructuredData articles={articles} />}
 
@@ -499,6 +500,6 @@ export default function HomePage() {
           Refresh articles
         </span>
       </button>
-    </>
+    </ErrorBoundary>
   );
 }

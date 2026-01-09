@@ -124,16 +124,20 @@ export async function fetchArticles(
       const remainingWithImages = withImages.slice(1); // Rest of articles with images
 
       // For positions 1-9: Apply daily rotation
-      // Use date as seed for consistent daily rotation
-      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-      const seed = today.split('-').reduce((acc, val) => acc + parseInt(val), 0);
+      let rotatedWithImages = remainingWithImages;
 
-      // Rotate the remaining articles with images (positions 1+)
-      const rotationOffset = seed % Math.max(1, remainingWithImages.length);
-      const rotatedWithImages = [
-        ...remainingWithImages.slice(rotationOffset),
-        ...remainingWithImages.slice(0, rotationOffset),
-      ];
+      if (remainingWithImages.length > 0) {
+        // Use date as seed for consistent daily rotation
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const seed = today.split('-').reduce((acc, val) => acc + parseInt(val), 0);
+
+        // Rotate the remaining articles with images (positions 1+)
+        const rotationOffset = seed % remainingWithImages.length;
+        rotatedWithImages = [
+          ...remainingWithImages.slice(rotationOffset),
+          ...remainingWithImages.slice(0, rotationOffset),
+        ];
+      }
 
       // Build first page: hero + mix of rotated images and no-images
       // Aim for 5 with images (including hero) and 5 without

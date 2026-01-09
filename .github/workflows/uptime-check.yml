@@ -1,0 +1,125 @@
+name: Uptime Check & Alert
+
+on:
+  schedule:
+    # Check every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Site Health
+        id: health
+        run: |
+          # Fetch health check endpoint
+          RESPONSE=$(curl -s -w "\n%{http_code}" https://blacktechnews.com/health)
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n-1)
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "$BODY" | jq '.'
+
+          # Check if status is 200 and healthy
+          if [ "$HTTP_CODE" = "200" ]; then
+            STATUS=$(echo "$BODY" | jq -r '.status')
+            if [ "$STATUS" = "healthy" ]; then
+              echo "✅ Site is healthy"
+              exit 0
+            else
+              echo "❌ Site returned unhealthy status"
+              echo "status=unhealthy" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+          else
+            echo "❌ Site returned HTTP $HTTP_CODE"
+            echo "status=down" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Send Alert on Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Create an issue to alert about downtime
+            const title = '🚨 Site Health Check Failed';
+            const body = `
+            ## Site Health Alert
+
+            The automated health check has detected an issue with the site.
+
+            **Time:** ${new Date().toISOString()}
+            **Status:** ${{ steps.health.outputs.status || 'unknown' }}
+
+            ### Next Steps
+            1. Check https://blacktechnews.com/health
+            2. Verify Wolf Studio API is responding
+            3. Check Cloudflare Pages deployment status
+            4. Review recent commits for breaking changes
+
+            ### Quick Links
+            - [Cloudflare Dashboard](https://dash.cloudflare.com)
+            - [GitHub Actions](https://github.com/${{ github.repository }}/actions)
+            - [Wolf Studio API](https://wolf-development-studio.vercel.app/api/articles/list?limit=1)
+
+            This issue will auto-close when the site recovers.
+            `;
+
+            // Check if there's already an open issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'uptime-alert',
+            });
+
+            if (issues.data.length === 0) {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['uptime-alert', 'critical'],
+              });
+              console.log('Created new downtime alert issue');
+            } else {
+              console.log('Downtime alert issue already exists');
+            }
+
+  close-alert-on-recovery:
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Close Alert Issue if Site Recovered
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Find open uptime alert issues
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'uptime-alert',
+            });
+
+            // Close them with recovery message
+            for (const issue of issues.data) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `✅ Site has recovered and is now healthy!\n\n**Recovery Time:** ${new Date().toISOString()}`,
+              });
+
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+              });
+
+              console.log(`Closed issue #${issue.number}`);
+            }
