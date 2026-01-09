@@ -89,11 +89,16 @@ export async function fetchArticles(
       throw new Error(data.message || 'Failed to fetch articles');
     }
 
-    // Convert date strings back to Date objects
-    const articles = data.articles.map(article => ({
-      ...article,
-      publishedAt: new Date(article.publishedAt),
-    }));
+    // Convert date strings back to Date objects and filter out non-Black publications
+    const articles = data.articles
+      .filter(article => {
+        // Filter out Wired Culture - not a Black publication
+        return article.source.name !== 'Wired Culture';
+      })
+      .map(article => ({
+        ...article,
+        publishedAt: new Date(article.publishedAt),
+      }));
 
     // Black Tech News smart sorting: lock hero, rotate the rest
     articles.sort((a, b) => {
