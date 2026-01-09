@@ -27,26 +27,23 @@ function getWeekBounds(monday: Date) {
   return { sunday, saturday };
 }
 
-// Generate list of weekly digests (last 12 weeks)
+// Generate list of weekly digests (only current week for now)
 function generateWeeklyDigests() {
   const digests = [];
   const today = new Date();
 
-  for (let i = 0; i < 12; i++) {
-    const weekDate = new Date(today);
-    weekDate.setDate(today.getDate() - (i * 7));
-    const monday = getMondayOfWeek(weekDate);
-    const { sunday, saturday } = getWeekBounds(monday);
+  // Only show the current week
+  const monday = getMondayOfWeek(today);
+  const { sunday, saturday } = getWeekBounds(monday);
 
-    digests.push({
-      id: monday.toISOString().split('T')[0],
-      monday,
-      sunday,
-      saturday,
-      // Estimated story count - you can fetch real counts later
-      storyCount: Math.floor(Math.random() * 20) + 30,
-    });
-  }
+  digests.push({
+    id: monday.toISOString().split('T')[0],
+    monday,
+    sunday,
+    saturday,
+    // Estimated story count - you can fetch real counts later
+    storyCount: Math.floor(Math.random() * 20) + 30,
+  });
 
   return digests;
 }
@@ -96,7 +93,7 @@ export default function WeeklySummaryPage() {
             Weekly Summaries
           </h1>
           <div className="text-sm text-gray-600">
-            {digests.length} weekly digests available
+            {digests.length} weekly digest{digests.length !== 1 ? 's' : ''} available
           </div>
         </div>
 

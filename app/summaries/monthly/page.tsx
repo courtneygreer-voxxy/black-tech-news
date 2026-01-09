@@ -8,24 +8,23 @@ import { Calendar } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 20;
 
-// Generate list of monthly reports (last 12 months)
+// Generate list of monthly reports (only current month for now)
 function generateMonthlyReports() {
   const reports = [];
   const today = new Date();
 
-  for (let i = 0; i < 12; i++) {
-    const reportDate = new Date(today.getFullYear(), today.getMonth() - i, 1);
-    const year = reportDate.getFullYear();
-    const month = reportDate.getMonth() + 1;
-    const reportId = `${year}-${String(month).padStart(2, '0')}`;
+  // Only show the current month
+  const reportDate = new Date(today.getFullYear(), today.getMonth(), 1);
+  const year = reportDate.getFullYear();
+  const month = reportDate.getMonth() + 1;
+  const reportId = `${year}-${String(month).padStart(2, '0')}`;
 
-    reports.push({
-      id: reportId,
-      date: reportDate,
-      // Estimated story count - you can fetch real counts later
-      storyCount: Math.floor(Math.random() * 50) + 100,
-    });
-  }
+  reports.push({
+    id: reportId,
+    date: reportDate,
+    // Estimated story count - you can fetch real counts later
+    storyCount: Math.floor(Math.random() * 50) + 100,
+  });
 
   return reports;
 }
@@ -72,7 +71,7 @@ export default function MonthlySummaryPage() {
             Monthly Summaries
           </h1>
           <div className="text-sm text-gray-600">
-            {reports.length} monthly reports available
+            {reports.length} monthly report{reports.length !== 1 ? 's' : ''} available
           </div>
         </div>
 
