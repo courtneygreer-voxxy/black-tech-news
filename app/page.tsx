@@ -314,13 +314,13 @@ export default function HomePage() {
             </div>
           </div>
         ) : showDailyPull ? (
-          <div className="flex items-center justify-center min-h-[600px]">
+          <div className="flex items-center justify-center py-8 px-4">
             <div className="max-w-2xl w-full text-center">
-              {/* Pan-African Flag Animation */}
-              <div className="mb-8 flex justify-center">
-                <div className="relative w-64 h-64">
+              {/* Pan-African Flag Animation - Compact for mobile */}
+              <div className="mb-6 flex justify-center">
+                <div className="relative w-32 h-32 sm:w-48 sm:h-48">
                   {/* Animated colored bars */}
-                  <div className={`absolute inset-0 flex space-x-4 ${isPulling ? 'animate-pulse' : ''}`}>
+                  <div className={`absolute inset-0 flex space-x-2 sm:space-x-3 ${isPulling ? 'animate-pulse' : ''}`}>
                     <div className={`flex-1 bg-red-600 rounded-lg transition-all duration-1000 ${isPulling ? 'scale-110' : 'scale-100'}`}></div>
                     <div className={`flex-1 bg-black rounded-lg transition-all duration-1000 delay-100 ${isPulling ? 'scale-110' : 'scale-100'}`}></div>
                     <div className={`flex-1 bg-green-600 rounded-lg transition-all duration-1000 delay-200 ${isPulling ? 'scale-110' : 'scale-100'}`}></div>
@@ -329,8 +329,8 @@ export default function HomePage() {
                   {/* Center icon */}
                   {!isPulling && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="bg-white rounded-full p-8 shadow-2xl">
-                        <svg className="w-16 h-16 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="bg-white rounded-full p-4 sm:p-6 shadow-2xl">
+                        <svg className="w-8 h-8 sm:w-12 sm:h-12 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                         </svg>
                       </div>
@@ -339,39 +339,38 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Text Content */}
-              <h2 className="text-4xl font-bold text-black mb-4">
+              {/* Text Content - Compact for mobile */}
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-3">
                 {isPulling ? 'Pulling Today\'s Stories...' : 'Good Morning! ☀️'}
               </h2>
 
               {!isPulling ? (
                 <>
-                  <p className="text-xl text-gray-700 mb-8 leading-relaxed">
-                    Start your day with the latest Black tech news.<br />
-                    Click below to generate today's top stories.
+                  <p className="text-base sm:text-lg md:text-xl text-gray-700 mb-6 leading-relaxed px-4">
+                    Start your day with the latest Black tech news.
                   </p>
 
                   <button
                     onClick={handleDailyPull}
-                    className="group relative px-12 py-6 bg-gradient-to-r from-red-600 via-black to-green-600 text-white text-xl font-bold rounded-lg hover:scale-105 transition-all duration-300 shadow-2xl overflow-hidden"
+                    className="group relative px-8 sm:px-12 py-4 sm:py-6 bg-gradient-to-r from-red-600 via-black to-green-600 text-white text-lg sm:text-xl font-bold rounded-lg hover:scale-105 active:scale-95 transition-all duration-300 shadow-2xl overflow-hidden w-full max-w-md mx-auto"
                   >
                     {/* Animated shine effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-30 group-hover:animate-shimmer"></div>
 
-                    <span className="relative flex items-center justify-center space-x-3">
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span className="relative flex items-center justify-center space-x-2 sm:space-x-3">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                       <span>Pull Today's Top Stories</span>
                     </span>
                   </button>
 
-                  <p className="text-sm text-gray-500 mt-6">
-                    Join thousands of students, founders, and professionals starting their day informed.
+                  <p className="text-xs sm:text-sm text-gray-500 mt-4 px-4">
+                    Join thousands starting their day informed
                   </p>
                 </>
               ) : (
-                <div className="flex justify-center items-center space-x-2">
+                <div className="flex justify-center items-center space-x-2 py-4">
                   <div className="w-3 h-3 bg-red-600 rounded-full animate-bounce"></div>
                   <div className="w-3 h-3 bg-black rounded-full animate-bounce delay-100"></div>
                   <div className="w-3 h-3 bg-green-600 rounded-full animate-bounce delay-200"></div>
@@ -395,17 +394,19 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar Filters */}
-            <SidebarFilters
-              filterOptions={filterOptions}
-              activeFilters={activeFilters}
-              onFilterChange={handleFilterChange}
-              resultCount={filteredArticles.length}
-              totalCount={articles.length}
-            />
+            {/* Sidebar Filters - Show AFTER content on mobile */}
+            <div className="order-2 lg:order-1 w-full lg:w-64 flex-shrink-0">
+              <SidebarFilters
+                filterOptions={filterOptions}
+                activeFilters={activeFilters}
+                onFilterChange={handleFilterChange}
+                resultCount={filteredArticles.length}
+                totalCount={articles.length}
+              />
+            </div>
 
-            {/* Content Area */}
-            <div className="flex-1 min-w-0">
+            {/* Content Area - Show FIRST on mobile */}
+            <div className="order-1 lg:order-2 flex-1 min-w-0">
               {filteredArticles.length === 0 ? (
                 <div className="text-center py-16">
                   <div className="flex justify-center space-x-2 mb-6">
