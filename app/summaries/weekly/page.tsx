@@ -76,10 +76,10 @@ export default function WeeklySummaryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col">
       <BTNNavbar />
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+      <main className="flex-1 max-w-3xl mx-auto px-4 sm:px-6 py-8 w-full">
         {/* Breadcrumb */}
         <div className="mb-4 text-sm text-gray-600">
           <Link href="/" className="hover:underline">Home</Link>

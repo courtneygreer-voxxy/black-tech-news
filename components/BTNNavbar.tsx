@@ -50,7 +50,7 @@ export default function BTNNavbar({ onRefresh, isRefreshing, lastRefresh }: BTNN
                 Black Tech News
               </h1>
               <p className="hidden md:block text-xs text-gray-600 tracking-wide uppercase">
-                Celebrating Black Excellence in Technology, Startups, and Digital Culture
+                Empowering Black Tech Excellence.
               </p>
             </div>
           </Link>
