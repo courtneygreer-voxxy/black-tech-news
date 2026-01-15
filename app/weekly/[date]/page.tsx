@@ -214,11 +214,6 @@ export default async function WeeklyDigestPage({ params }: WeeklyPageProps) {
                   </p>
 
                   <p className="flex items-start">
-                    <span className="font-semibold text-red-600 mr-2">Key Insight:</span>
-                    <span>{story.keyInsight}</span>
-                  </p>
-
-                  <p className="flex items-start">
                     <span className="font-semibold text-red-600 mr-2">Why It Matters:</span>
                     <span>{story.whyItMatters}</span>
                   </p>
