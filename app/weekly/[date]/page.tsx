@@ -12,15 +12,12 @@ interface WeeklyPageProps {
 
 // Generate static params for pre-rendering
 export async function generateStaticParams() {
-  // For now, generate just this week's digest
-  // In production, this would generate last 4-8 weeks
-  const today = new Date();
-  const currentWeek = getWeekBounds(today);
-  const monday = new Date(currentWeek.weekStart);
-  monday.setDate(monday.getDate() + 1); // Sunday -> Monday
+  // Generate pages for published weekly digests
+  // Each digest is published on Monday and covers the previous week (Sun-Sat)
 
+  // Week 1: January 5-11, 2026 (published Monday Jan 12)
   return [
-    { date: monday.toISOString().split('T')[0] },
+    { date: '2026-01-12' }, // Monday publication date
   ];
 }
 
@@ -90,37 +87,44 @@ export async function generateMetadata({ params }: WeeklyPageProps): Promise<Met
 // Get digest for a specific date
 async function getDigestForDate(dateStr: string): Promise<WeeklyDigest | null> {
   try {
-    // Parse date (format: YYYY-MM-DD, should be a Monday)
-    const monday = new Date(dateStr);
+    // Parse date (format: YYYY-MM-DD, this is the Monday publication date)
+    // The digest covers the PREVIOUS week (Sunday before Monday through Saturday before Monday)
+    const monday = new Date(dateStr + 'T00:00:00');
     if (isNaN(monday.getTime())) {
       return null;
     }
 
-    // Get the Sunday before this Monday
+    // Get the Sunday that starts the previous week (7 days before Monday)
     const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() - 1);
+    sunday.setDate(monday.getDate() - 7);
     sunday.setHours(0, 0, 0, 0);
 
-    // Get the Saturday after this Sunday
-    const saturday = new Date(sunday);
-    saturday.setDate(sunday.getDate() + 6);
+    // Get the Saturday that ends the previous week (1 day before Monday)
+    const saturday = new Date(monday);
+    saturday.setDate(monday.getDate() - 1);
     saturday.setHours(23, 59, 59, 999);
 
     console.log('[Weekly Page] Fetching digest for:', {
       dateStr,
-      sunday: sunday.toISOString(),
-      saturday: saturday.toISOString(),
+      publicationDate: monday.toISOString(),
+      weekStart: sunday.toISOString(),
+      weekEnd: saturday.toISOString(),
     });
 
     // Fetch articles from the week
-    const allArticles = await fetchArticlesForBuild(50);
+    const allArticles = await fetchArticlesForBuild(100);
     const weekArticles = allArticles.filter((article) => {
       const publishedDate = new Date(article.publishedAt);
       return publishedDate >= sunday && publishedDate <= saturday;
     });
 
-    // Use recent articles if none in that specific week
+    console.log('[Weekly Page] Found', weekArticles.length, 'articles in date range');
+    console.log('[Weekly Page] Total articles available:', allArticles.length);
+
+    // Use articles from the week, or fall back to recent if needed
     const articlesToUse = weekArticles.length > 0 ? weekArticles : allArticles.slice(0, 15);
+
+    console.log('[Weekly Page] Using', articlesToUse.length, 'articles for digest');
 
     // Generate digest
     const digest = await generateWeeklyDigest(sunday, saturday, articlesToUse);

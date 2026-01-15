@@ -8,41 +8,23 @@ import { Calendar } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 20;
 
-// Helper to get Monday of a week
-function getMondayOfWeek(date: Date): Date {
-  const day = date.getDay();
-  const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
-  const monday = new Date(date);
-  monday.setDate(diff);
-  monday.setHours(0, 0, 0, 0);
-  return monday;
-}
-
-// Helper to get week bounds
-function getWeekBounds(monday: Date) {
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() - 1);
-  const saturday = new Date(monday);
-  saturday.setDate(monday.getDate() + 5);
-  return { sunday, saturday };
-}
-
-// Generate list of weekly digests (only current week for now)
+// Generate list of weekly digests
+// Summaries are published on Mondays and cover the PREVIOUS week (Sunday-Saturday)
 function generateWeeklyDigests() {
   const digests = [];
-  const today = new Date();
 
-  // Only show the current week
-  const monday = getMondayOfWeek(today);
-  const { sunday, saturday } = getWeekBounds(monday);
+  // First week: January 5-11, 2026 (published Monday Jan 12)
+  // This is the only week for now, more will be added each Monday
+  const week1Start = new Date('2026-01-05T00:00:00'); // Sunday
+  const week1End = new Date('2026-01-11T23:59:59');   // Saturday
+  const week1Monday = new Date('2026-01-12T00:00:00'); // Publication date (Monday)
 
   digests.push({
-    id: monday.toISOString().split('T')[0],
-    monday,
-    sunday,
-    saturday,
-    // Estimated story count - you can fetch real counts later
-    storyCount: Math.floor(Math.random() * 20) + 30,
+    id: '2026-01-12', // Monday date when published
+    monday: week1Monday,
+    sunday: week1Start,
+    saturday: week1End,
+    storyCount: 45, // Approximate - will be accurate once generated
   });
 
   return digests;
