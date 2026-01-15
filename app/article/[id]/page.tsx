@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 // Generate static params for all articles
 export async function generateStaticParams() {
   try {
-    const articles = await fetchArticlesForBuild(50);
+    const articles = await fetchArticlesForBuild(100);
     // Encode article IDs to URL-safe format (base64url)
     return articles.map((article) => ({
       id: encodeArticleId(article.id),
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const articleId = decodeArticleId(id);
 
     // Fetch all articles to find this one (using build-time cached fetch)
-    const articles = await fetchArticlesForBuild(50);
+    const articles = await fetchArticlesForBuild(100);
     const article = articles.find(a => a.id === articleId);
 
     if (!article) {
