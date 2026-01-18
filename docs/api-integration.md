@@ -1,8 +1,14 @@
-# Black Tech News - API Integration Guide
+# API Integration Guide
 
-## Overview
+> Black Tech News uses a shared API hosted on Wolf Development Studio, allowing both sites to share article data while keeping costs low and maintenance simple.
 
-Black Tech News uses a **shared API** hosted on Wolf Development Studio. This allows both sites to share the same article data while keeping costs low and maintenance simple.
+## Quick Start
+
+```bash
+# Use production API (recommended for local dev)
+echo "NEXT_PUBLIC_API_URL=https://wolf-development-studio.vercel.app" > .env.local
+npm run dev
+```
 
 ## Architecture
 
@@ -281,3 +287,7 @@ For issues with the API integration, check:
 3. Console errors on both sites
 
 Need help? The API is simple and well-documented. Most issues are configuration-related.
+
+---
+
+*Last updated: January 2026*

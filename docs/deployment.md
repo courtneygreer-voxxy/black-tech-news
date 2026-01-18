@@ -1,6 +1,8 @@
-# Deployment Guide - Black Tech News
+# Deployment Guide
 
-This guide will walk you through deploying Black Tech News to Cloudflare Pages with Google Cloud SQL database.
+> Complete guide for deploying Black Tech News to Cloudflare Pages.
+
+**Note**: For local development, see [API Integration](./docs/api-integration.md). Database setup is optional - the site works with the Wolf Studio API alone.
 
 ## Prerequisites
 
@@ -257,3 +259,7 @@ gcloud sql export sql blacktechnews-db \
 ## Support
 
 For issues, contact Wolf Development Studio at hello@wolfdevelopmentstudio.com
+
+---
+
+*Last updated: January 2026*

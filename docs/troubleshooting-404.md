@@ -1,4 +1,6 @@
-# Troubleshooting Article Preview 404 Errors
+# Troubleshooting 404 Errors
+
+> Guide for debugging article preview 404 errors on the static site.
 
 ## Common Causes
 
@@ -196,3 +198,7 @@ If none of these fixes work:
 - `/components/ArticlePreviewClient.tsx` - Client-side loading
 - `/lib/utils.ts` - Encoding/decoding functions
 - `/lib/api/articles.ts` - API fetching
+
+---
+
+*Last updated: January 2026*

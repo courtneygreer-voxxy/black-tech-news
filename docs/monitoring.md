@@ -1,12 +1,10 @@
-# Black Tech News - Monitoring & Alerting Guide
+# Monitoring & Alerting Guide
 
-## Overview
-
-This document describes the monitoring infrastructure for blacktechnews.com to ensure you're alerted immediately when something breaks.
+> Monitoring infrastructure for blacktechnews.cc to ensure you're alerted when something breaks.
 
 ## 🏥 Health Check Endpoint
 
-**URL:** `https://blacktechnews.com/health`
+**URL:** `https://blacktechnews.cc/health`
 
 **What it checks:**
 - ✅ Site is responding
@@ -64,7 +62,7 @@ For instant SMS/Slack alerts, set up one of these services:
 - **Price:** Free for 1 monitor
 - **Setup:**
   1. Sign up at betteruptime.com
-  2. Add monitor: `https://blacktechnews.com/health`
+  2. Add monitor: `https://blacktechnews.cc/health`
   3. Set check interval: 1-3 minutes
   4. Add your phone number for SMS alerts
   5. Add Slack/Discord webhook (optional)
@@ -75,7 +73,7 @@ For instant SMS/Slack alerts, set up one of these services:
 - **Setup:**
   1. Sign up at uptimerobot.com
   2. Add New Monitor → HTTP(s)
-  3. URL: `https://blacktechnews.com/health`
+  3. URL: `https://blacktechnews.cc/health`
   4. Keyword to look for: `"healthy"`
   5. Check interval: 5 minutes (free tier)
   6. Add alert contacts (email, SMS, Slack, etc.)
@@ -91,9 +89,9 @@ Set up these monitors:
 
 | Monitor | URL | Alert When | Priority |
 |---------|-----|------------|----------|
-| **Homepage** | https://blacktechnews.com | Returns != 200 | 🔴 Critical |
-| **Health Check** | https://blacktechnews.com/health | Status != "healthy" | 🔴 Critical |
-| **Articles Load** | https://blacktechnews.com (check for text "Black Tech News") | Text not found | 🟡 High |
+| **Homepage** | https://blacktechnews.cc | Returns != 200 | 🔴 Critical |
+| **Health Check** | https://blacktechnews.cc/health | Status != "healthy" | 🔴 Critical |
+| **Articles Load** | https://blacktechnews.cc (check for text "Black Tech News") | Text not found | 🟡 High |
 | **Wolf API** | https://wolf-development-studio.vercel.app/api/articles/list?limit=1 | Returns != 200 | 🟡 High |
 
 ## 🚨 Alert Channels
@@ -120,7 +118,7 @@ Configure multiple channels so you don't miss anything:
 
 1. **Visit the health check:**
    ```bash
-   curl https://blacktechnews.com/health | jq
+   curl https://blacktechnews.cc/health | jq
    ```
 
 2. **Check Cloudflare status:**
@@ -172,7 +170,7 @@ Keep these handy:
 **For immediate monitoring:**
 
 1. **Sign up for Better Uptime** (free)
-   - Add `https://blacktechnews.com/health`
+   - Add `https://blacktechnews.cc/health`
    - Add your phone for SMS
 
 2. **Watch GitHub repo**
@@ -191,5 +189,9 @@ Install mobile apps for on-the-go alerts:
 
 **Questions?** Check the health endpoint status anytime:
 ```bash
-curl https://blacktechnews.com/health | jq
+curl https://blacktechnews.cc/health | jq
 ```
+
+---
+
+*Last updated: January 2026*

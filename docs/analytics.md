@@ -1,8 +1,6 @@
-# Black Tech News - Analytics & Privacy Documentation
+# Analytics & Privacy
 
-## Overview
-
-Black Tech News uses a **privacy-first analytics approach** with Google Analytics 4 (GA4) to understand user behavior and optimize the experience while respecting user privacy.
+> Black Tech News uses a privacy-first analytics approach with Google Analytics 4 (GA4) to understand user behavior while respecting privacy.
 
 ---
 

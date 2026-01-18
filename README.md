@@ -272,9 +272,16 @@ We welcome contributions! Here's how:
 
 ---
 
-## 📊 Analytics
+## 📚 Documentation
 
-Black Tech News tracks article views through the Wolf Studio API for analytics purposes. No personal data is collected.
+| Document | Description |
+|----------|-------------|
+| [API Integration](./docs/api-integration.md) | Wolf Studio API setup and usage |
+| [Deployment](./docs/deployment.md) | Cloudflare Pages deployment guide |
+| [Analytics](./docs/analytics.md) | GA4 setup and privacy documentation |
+| [Monitoring](./docs/monitoring.md) | Health checks and alerting |
+| [Troubleshooting](./docs/troubleshooting-404.md) | Debugging 404 errors |
+| [Migration Summary](./docs/migration-summary.md) | Project migration history |
 
 ---
 
@@ -311,7 +318,8 @@ Thank you to all the Black tech publications whose content we aggregate and ampl
 ## 📞 Support
 
 - **Issues**: [GitHub Issues](https://github.com/courtneygreer-voxxy/black-tech-news/issues)
-- **API Documentation**: [Wolf Studio README](https://github.com/courtneygreer-voxxy/wolf-development-studio/blob/main/README.md)
+- **Documentation**: [docs/](./docs/)
+- **Wolf Studio API**: [github.com/courtneygreer-voxxy/wolf-development-studio](https://github.com/courtneygreer-voxxy/wolf-development-studio)
 
 ---
 
