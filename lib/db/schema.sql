@@ -82,6 +82,27 @@ CREATE TRIGGER update_articles_updated_at BEFORE UPDATE ON articles
 CREATE TRIGGER update_sources_updated_at BEFORE UPDATE ON sources
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- Hidden articles table - admin-managed article visibility
+CREATE TABLE IF NOT EXISTS hidden_articles (
+  article_id VARCHAR(500) PRIMARY KEY,
+  hidden_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  hidden_by VARCHAR(255) -- Admin email who hid the article
+);
+
+CREATE INDEX IF NOT EXISTS idx_hidden_articles_hidden_at ON hidden_articles(hidden_at DESC);
+
+-- Keywords table - admin-managed keyword filters for Wolf Studio
+CREATE TABLE IF NOT EXISTS keywords (
+  id SERIAL PRIMARY KEY,
+  keyword VARCHAR(255) NOT NULL,
+  list_type VARCHAR(20) NOT NULL, -- 'whitelist' or 'blacklist'
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(keyword, list_type)
+);
+
+CREATE INDEX IF NOT EXISTS idx_keywords_list_type ON keywords(list_type);
+CREATE INDEX IF NOT EXISTS idx_keywords_keyword ON keywords(keyword);
+
 -- Insert default sources
 INSERT INTO sources (id, name, url, type, is_active) VALUES
   ('black-enterprise', 'Black Enterprise', 'https://www.blackenterprise.com/category/technology/feed/', 'rss', true),

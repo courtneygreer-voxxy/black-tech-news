@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // For Cloudflare Pages deployment
+  // For Vercel deployment with admin features
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -11,8 +11,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Static export for Cloudflare Pages (only in production)
-  output: process.env.NODE_ENV === 'production' ? 'export' : undefined,
+  // Removed static export to enable API routes and middleware for admin panel
 };
 
 export default nextConfig;
