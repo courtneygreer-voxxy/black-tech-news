@@ -1,7 +1,7 @@
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 import pool from "@/lib/db/client"
-import { generateWeeklyTheme } from "@/lib/ai/claude"
+import { generateWeeklyTheme } from "@/lib/ai/gemini"
 
 // POST /api/admin/summaries/weekly/generate - Generate new weekly summary
 export async function POST() {

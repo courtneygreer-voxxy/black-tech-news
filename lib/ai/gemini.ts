@@ -1,8 +1,6 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
 
 interface Article {
   title: string;
@@ -15,6 +13,8 @@ export async function generateWeeklyTheme(
   weekStart: Date,
   weekEnd: Date
 ): Promise<string> {
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
   const prompt = `You are analyzing a weekly digest of Black tech news articles. Given the following ${articles.length} articles from the week of ${weekStart.toLocaleDateString()} to ${weekEnd.toLocaleDateString()}, generate a compelling 2-3 paragraph theme that:
 
 1. Identifies the major trends and patterns across these articles
@@ -26,23 +26,15 @@ ${articles.map((a, i) => `${i + 1}. ${a.title}\n   ${a.excerpt || 'No excerpt av
 
 Write a concise, engaging theme that captures the essence of this week in Black tech news. Focus on the "why this matters" rather than just summarizing what happened.`;
 
-  const message = await client.messages.create({
-    model: 'claude-3-5-sonnet-20241022',
-    max_tokens: 1024,
-    messages: [
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ],
-  });
+  const result = await model.generateContent(prompt);
+  const response = result.response;
+  const text = response.text();
 
-  const content = message.content[0];
-  if (content.type === 'text') {
-    return content.text;
+  if (!text) {
+    throw new Error('No response from Gemini API');
   }
 
-  throw new Error('Unexpected response format from Claude API');
+  return text;
 }
 
 export async function generateMonthlyTheme(
@@ -50,6 +42,7 @@ export async function generateMonthlyTheme(
   monthStart: Date,
   monthEnd: Date
 ): Promise<string> {
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
   const monthName = monthStart.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   const prompt = `You are creating the "State of Black Tech" monthly executive summary. Given the following ${articles.length} top articles from ${monthName}, generate a comprehensive 3-4 paragraph executive summary that:
@@ -64,21 +57,13 @@ ${articles.map((a, i) => `${i + 1}. ${a.title}\n   ${a.excerpt || 'No excerpt av
 
 Write an authoritative, forward-looking executive summary that positions this as "The State of Black Tech" for ${monthName}. Think big picture - what story does this month tell about Black innovation and technology?`;
 
-  const message = await client.messages.create({
-    model: 'claude-3-5-sonnet-20241022',
-    max_tokens: 1500,
-    messages: [
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ],
-  });
+  const result = await model.generateContent(prompt);
+  const response = result.response;
+  const text = response.text();
 
-  const content = message.content[0];
-  if (content.type === 'text') {
-    return content.text;
+  if (!text) {
+    throw new Error('No response from Gemini API');
   }
 
-  throw new Error('Unexpected response format from Claude API');
+  return text;
 }

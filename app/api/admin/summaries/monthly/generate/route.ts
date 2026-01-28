@@ -1,7 +1,7 @@
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 import pool from "@/lib/db/client"
-import { generateMonthlyTheme } from "@/lib/ai/claude"
+import { generateMonthlyTheme } from "@/lib/ai/gemini"
 
 // POST /api/admin/summaries/monthly/generate - Generate new monthly summary
 export async function POST() {
