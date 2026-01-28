@@ -71,6 +71,25 @@ export default async function AdminDashboard() {
             Manage Monthly
           </Link>
         </div>
+
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-medium text-gray-900">
+                Email Subscribers
+              </h2>
+              <p className="mt-1 text-sm text-gray-500">
+                Manage newsletter subscribers and export email lists
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/admin/subscribers"
+            className="mt-4 inline-block px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          >
+            View Subscribers
+          </Link>
+        </div>
       </div>
     </div>
   )
