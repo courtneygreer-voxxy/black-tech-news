@@ -154,6 +154,42 @@ CREATE TRIGGER update_weekly_summaries_updated_at BEFORE UPDATE ON weekly_summar
 CREATE TRIGGER update_monthly_summaries_updated_at BEFORE UPDATE ON monthly_summaries
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- Email subscribers table - stores newsletter signups
+-- Designed to potentially upgrade to full user accounts in the future
+CREATE TABLE IF NOT EXISTS email_subscribers (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  status VARCHAR(20) DEFAULT 'active',    -- 'active', 'unsubscribed', 'bounced'
+  source VARCHAR(50) DEFAULT 'website',   -- Where they signed up (website, api, etc)
+  referrer_url TEXT,                      -- Page they signed up from
+  ip_address INET,                        -- IP for spam prevention
+  user_agent TEXT,                        -- Browser info
+  subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  unsubscribed_at TIMESTAMP,
+  last_email_sent_at TIMESTAMP,           -- Track when we last emailed them
+  email_count INTEGER DEFAULT 0,          -- How many emails sent to them
+
+  -- Future user account fields (not used yet, but ready)
+  first_name VARCHAR(100),
+  last_name VARCHAR(100),
+  user_id INTEGER,                        -- Foreign key to future users table
+
+  -- Preferences for future use
+  preferences JSONB,                      -- Email frequency, topics, etc
+
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_email_subscribers_email ON email_subscribers(email);
+CREATE INDEX IF NOT EXISTS idx_email_subscribers_status ON email_subscribers(status);
+CREATE INDEX IF NOT EXISTS idx_email_subscribers_subscribed_at ON email_subscribers(subscribed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_email_subscribers_user_id ON email_subscribers(user_id);
+
+-- Trigger for email subscribers
+CREATE TRIGGER update_email_subscribers_updated_at BEFORE UPDATE ON email_subscribers
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 -- Insert default sources
 INSERT INTO sources (id, name, url, type, is_active) VALUES
   ('black-enterprise', 'Black Enterprise', 'https://www.blackenterprise.com/category/technology/feed/', 'rss', true),
