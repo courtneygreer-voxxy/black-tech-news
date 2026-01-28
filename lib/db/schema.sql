@@ -103,6 +103,57 @@ CREATE TABLE IF NOT EXISTS keywords (
 CREATE INDEX IF NOT EXISTS idx_keywords_list_type ON keywords(list_type);
 CREATE INDEX IF NOT EXISTS idx_keywords_keyword ON keywords(keyword);
 
+-- Weekly summaries table - stores weekly digest archives
+CREATE TABLE IF NOT EXISTS weekly_summaries (
+  id SERIAL PRIMARY KEY,
+  week_start DATE NOT NULL,           -- Sunday of the week
+  week_end DATE NOT NULL,             -- Saturday of the week
+  publication_date DATE NOT NULL,     -- Monday (when it's published)
+  title VARCHAR(255) NOT NULL,
+  theme TEXT,                         -- AI-generated theme/analysis
+  article_ids TEXT[],                 -- Array of article external_ids (top 10)
+  article_count INTEGER DEFAULT 0,    -- Total articles in that week
+  is_published BOOLEAN DEFAULT false, -- Admin controls visibility
+  created_by VARCHAR(255),            -- Admin email who created it
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  published_at TIMESTAMP,             -- When admin published it
+  UNIQUE(publication_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_weekly_summaries_publication_date ON weekly_summaries(publication_date DESC);
+CREATE INDEX IF NOT EXISTS idx_weekly_summaries_is_published ON weekly_summaries(is_published);
+CREATE INDEX IF NOT EXISTS idx_weekly_summaries_created_at ON weekly_summaries(created_at DESC);
+
+-- Monthly summaries table - stores monthly report archives
+CREATE TABLE IF NOT EXISTS monthly_summaries (
+  id SERIAL PRIMARY KEY,
+  month_start DATE NOT NULL,          -- First day of month
+  month_end DATE NOT NULL,            -- Last day of month
+  publication_date DATE NOT NULL,     -- First Monday of next month
+  title VARCHAR(255) NOT NULL,
+  theme TEXT,                         -- AI-generated executive summary
+  article_ids TEXT[],                 -- Array of article external_ids (top 10)
+  article_count INTEGER DEFAULT 0,    -- Total articles in that month
+  is_published BOOLEAN DEFAULT false,
+  created_by VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  published_at TIMESTAMP,
+  UNIQUE(publication_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_monthly_summaries_publication_date ON monthly_summaries(publication_date DESC);
+CREATE INDEX IF NOT EXISTS idx_monthly_summaries_is_published ON monthly_summaries(is_published);
+CREATE INDEX IF NOT EXISTS idx_monthly_summaries_created_at ON monthly_summaries(created_at DESC);
+
+-- Triggers for summary tables
+CREATE TRIGGER update_weekly_summaries_updated_at BEFORE UPDATE ON weekly_summaries
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_monthly_summaries_updated_at BEFORE UPDATE ON monthly_summaries
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 -- Insert default sources
 INSERT INTO sources (id, name, url, type, is_active) VALUES
   ('black-enterprise', 'Black Enterprise', 'https://www.blackenterprise.com/category/technology/feed/', 'rss', true),

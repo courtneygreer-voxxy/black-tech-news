@@ -1,34 +1,64 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { fetchArticlesForBuild } from '@/lib/api/articles';
-import { generateMonthlyReport, getMonthBounds } from '@/lib/monthly/generator';
+import pool from '@/lib/db/client';
 import { encodeArticleId } from '@/lib/utils';
-import type { MonthlyReport } from '@/lib/monthly/types';
 
 interface MonthlyPageProps {
   params: Promise<{ date: string }>;
 }
 
+interface MonthlySummary {
+  id: number;
+  month_start: string;
+  month_end: string;
+  publication_date: string;
+  title: string;
+  theme: string | null;
+  article_ids: string[];
+  article_count: number;
+  is_published: boolean;
+  created_at: string;
+  published_at: string | null;
+}
+
+interface Article {
+  external_id: string;
+  title: string;
+  excerpt: string;
+  url: string;
+  category: string;
+  published_at: string;
+}
+
 // Generate static params for pre-rendering
 export async function generateStaticParams() {
-  // Always generate this month's report ID
-  // The page itself will show "generating" state before the 28th
-  const today = new Date();
-  const reportId = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  try {
+    const result = await pool.query(`
+      SELECT publication_date
+      FROM monthly_summaries
+      WHERE is_published = true
+      ORDER BY publication_date DESC
+    `);
 
-  return [
-    { date: reportId }, // e.g., "2026-01"
-  ];
+    return result.rows.map(row => ({
+      date: row.publication_date.substring(0, 7), // YYYY-MM format
+    }));
+  } catch (error) {
+    console.error('Error generating static params:', error);
+    return [];
+  }
 }
+
+export const revalidate = 300; // Revalidate every 5 minutes
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: MonthlyPageProps): Promise<Metadata> {
   try {
     const { date } = await params;
-    const report = await getReportForDate(date);
+    const summary = await getSummaryForDate(date);
 
-    if (!report) {
+    if (!summary) {
       return {
         title: 'Monthly Report Not Found | Black Tech News',
         description: 'This monthly report could not be found.',
@@ -39,10 +69,13 @@ export async function generateMetadata({ params }: MonthlyPageProps): Promise<Me
       };
     }
 
+    const description = summary.theme
+      ? summary.theme.substring(0, 160) + '...'
+      : `State of Black Tech monthly report featuring ${summary.article_count} top stories`;
+
     return {
-      title: report.metadata.seoTitle,
-      description: report.metadata.seoDescription,
-      keywords: report.metadata.keywords,
+      title: `${summary.title} | Black Tech News`,
+      description,
 
       robots: {
         index: true,
@@ -57,23 +90,21 @@ export async function generateMetadata({ params }: MonthlyPageProps): Promise<Me
 
       openGraph: {
         type: 'article',
-        title: report.metadata.seoTitle,
-        description: report.metadata.seoDescription,
-        url: `https://blacktechnews.com/monthly/${date}`,
+        title: summary.title,
+        description,
+        url: `https://blacktechnews.cc/monthly/${date}`,
         siteName: 'Black Tech News',
-        publishedTime: report.generatedAt.toISOString(),
+        publishedTime: summary.published_at || summary.created_at,
       },
 
       twitter: {
         card: 'summary_large_image',
-        title: report.metadata.seoTitle,
-        description: report.metadata.seoDescription,
-        creator: '@BlackTechNews',
-        site: '@BlackTechNews',
+        title: summary.title,
+        description,
       },
 
       alternates: {
-        canonical: `https://blacktechnews.com/monthly/${date}`,
+        canonical: `https://blacktechnews.cc/monthly/${date}`,
       },
     };
   } catch (error) {
@@ -85,166 +116,190 @@ export async function generateMetadata({ params }: MonthlyPageProps): Promise<Me
   }
 }
 
-// Get report for a specific month
-async function getReportForDate(dateStr: string): Promise<MonthlyReport | null> {
+// Get summary for a specific month (YYYY-MM format)
+async function getSummaryForDate(dateStr: string): Promise<MonthlySummary | null> {
   try {
-    // Parse date (format: YYYY-MM)
-    const [year, month] = dateStr.split('-').map(Number);
-    if (!year || !month || month < 1 || month > 12) {
+    const result = await pool.query(`
+      SELECT
+        id, month_start, month_end, publication_date, title, theme,
+        article_ids, article_count, is_published, created_at, published_at
+      FROM monthly_summaries
+      WHERE publication_date LIKE $1 AND is_published = true
+    `, [dateStr + '%']);
+
+    if (result.rows.length === 0) {
       return null;
     }
 
-    const reportDate = new Date(year, month - 1, 1);
-    const bounds = getMonthBounds(reportDate);
-
-    console.log('[Monthly Page] Fetching report for:', {
-      dateStr,
-      monthStart: bounds.monthStart.toISOString(),
-      monthEnd: bounds.monthEnd.toISOString(),
-    });
-
-    // Fetch articles from the month
-    const allArticles = await fetchArticlesForBuild(100);
-    const monthArticles = allArticles.filter((article) => {
-      const publishedDate = new Date(article.publishedAt);
-      return publishedDate >= bounds.monthStart && publishedDate <= bounds.monthEnd;
-    });
-
-    // Use recent articles if none in that specific month
-    const articlesToUse = monthArticles.length > 0 ? monthArticles : allArticles.slice(0, 30);
-
-    // Generate report
-    const report = await generateMonthlyReport(bounds.monthStart, bounds.monthEnd, articlesToUse);
-
-    return report;
+    return result.rows[0];
   } catch (error) {
-    console.error('[Monthly Page] Error fetching report:', error);
+    console.error('[Monthly Page] Error fetching summary:', error);
     return null;
+  }
+}
+
+// Fetch articles by external IDs
+async function getArticlesByIds(externalIds: string[]): Promise<Article[]> {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://wolf-development-studio.vercel.app';
+    const response = await fetch(`${apiUrl}/api/articles/list?limit=200`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch articles: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const allArticles = data.articles || [];
+
+    // Filter to only the articles in our summary
+    const articles = allArticles.filter((article: any) =>
+      externalIds.includes(article.external_id)
+    );
+
+    // Sort by the order in externalIds
+    return articles.sort((a: any, b: any) => {
+      return externalIds.indexOf(a.external_id) - externalIds.indexOf(b.external_id);
+    });
+  } catch (error) {
+    console.error('[Monthly Page] Error fetching articles:', error);
+    return [];
   }
 }
 
 export default async function MonthlyReportPage({ params }: MonthlyPageProps) {
   const { date } = await params;
-  const report = await getReportForDate(date);
+  const summary = await getSummaryForDate(date);
 
-  if (!report) {
+  if (!summary) {
     notFound();
   }
+
+  const articles = await getArticlesByIds(summary.article_ids);
+
+  const monthStart = new Date(summary.month_start);
+  const monthName = monthStart.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   return (
     <main className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="bg-black text-white py-12 border-b-4 border-red-600">
+      <div className="bg-black text-white py-16 border-b-4 border-red-600">
         <div className="max-w-4xl mx-auto px-8">
-          <div className="flex items-center space-x-3 mb-4">
+          <div className="flex items-center space-x-3 mb-6">
             <div className="flex space-x-1">
-              <div className="w-2 h-12 bg-red-600"></div>
-              <div className="w-2 h-12 bg-white"></div>
-              <div className="w-2 h-12 bg-green-600"></div>
+              <div className="w-2 h-16 bg-red-600"></div>
+              <div className="w-2 h-16 bg-white"></div>
+              <div className="w-2 h-16 bg-green-600"></div>
             </div>
             <div>
               <p className="text-sm text-gray-400 uppercase tracking-wide">Monthly Report</p>
-              <p className="text-xs text-gray-500">
-                {report.articleCount} Articles Analyzed
-              </p>
+              <p className="text-xs text-gray-500">State of Black Tech</p>
             </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{report.title}</h1>
-          <p className="text-gray-300 text-lg">
-            Your monthly pulse on Black tech industry success and innovation
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">{summary.title}</h1>
+          <p className="text-gray-300 text-xl">
+            Comprehensive monthly analysis of the Black tech ecosystem
           </p>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-8 py-12">
-        {/* Executive Summary */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-6 flex items-center">
-            <span className="w-1 h-8 bg-red-600 mr-4"></span>
-            Industry Pulse
-          </h2>
-          <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
-            <p className="text-lg">
-              {report.executiveSummary.split('\n\n')[0]}
-            </p>
-          </div>
-        </section>
+        {/* Executive Summary Section */}
+        {summary.theme && (
+          <section className="mb-16">
+            <h2 className="text-3xl font-bold mb-6 flex items-center">
+              <span className="w-1 h-8 bg-red-600 mr-4"></span>
+              Executive Summary
+            </h2>
+            <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+              {summary.theme.split('\n\n').map((paragraph, i) => (
+                <p key={i} className="mb-4">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </section>
+        )}
 
-        {/* Top Stories */}
+        {/* Top Stories Section */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold mb-8 flex items-center">
             <span className="w-1 h-8 bg-red-600 mr-4"></span>
-            Top 10 Stories This Month
+            Top Stories from {monthName}
           </h2>
 
-          <div className="space-y-6">
-            {report.topStories.map((story) => (
-              <article key={story.article.id} className="border border-gray-200 rounded-lg p-6 hover:border-red-600 transition-colors">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center mb-2">
-                      <span className="text-3xl font-bold text-red-600 mr-4">#{story.rank}</span>
-                      <h3 className="text-xl font-bold flex-1">
-                        <Link
-                          href={`/article/${encodeArticleId(story.article.id)}`}
-                          className="hover:text-red-600 transition-colors"
-                        >
-                          {story.article.title}
-                        </Link>
-                      </h3>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
-                      <span className="capitalize">{story.article.category.replace('-', ' ')}</span>
-                      <span>•</span>
-                      <span className={`font-medium ${
-                        story.impact === 'transformative' ? 'text-red-600' :
-                        story.impact === 'significant' ? 'text-orange-600' :
-                        'text-blue-600'
-                      }`}>
-                        {story.impact.charAt(0).toUpperCase() + story.impact.slice(1)} Impact
-                      </span>
-                      <span>•</span>
-                      <span>Relevance: {story.relevanceScore}%</span>
-                    </div>
-                  </div>
+          <div className="space-y-8">
+            {articles.map((article, index) => (
+              <article key={article.external_id} className="border-l-4 border-gray-200 pl-6 hover:border-red-600 transition-colors">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="text-2xl font-bold text-gray-900 flex-1">
+                    <Link
+                      href={`/article/${encodeArticleId(article.external_id)}`}
+                      className="hover:text-red-600 transition-colors"
+                    >
+                      {index + 1}. {article.title}
+                    </Link>
+                  </h3>
                 </div>
 
-                <p className="text-gray-700 mb-3">{story.keyTakeaway}</p>
+                <div className="space-y-3 text-gray-700">
+                  <p className="flex items-start">
+                    <span className="font-semibold text-red-600 mr-2">Category:</span>
+                    <span className="capitalize">{article.category.replace('-', ' ')}</span>
+                  </p>
 
-                <Link
-                  href={`/article/${encodeArticleId(story.article.id)}`}
-                  className="inline-block text-red-600 hover:text-red-700 font-medium"
-                >
-                  Read full story →
-                </Link>
+                  {article.excerpt && (
+                    <p className="text-gray-600">
+                      {article.excerpt}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-4 flex items-center gap-4">
+                  <Link
+                    href={`/article/${encodeArticleId(article.external_id)}`}
+                    className="text-red-600 hover:text-red-700 font-medium"
+                  >
+                    Read full story →
+                  </Link>
+                  <a
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-600 hover:text-gray-700 text-sm"
+                  >
+                    View source ↗
+                  </a>
+                </div>
               </article>
             ))}
           </div>
         </section>
 
-        {/* Call to Action */}
-        <section className="bg-gray-50 rounded-lg p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">Stay Informed</h2>
-          <p className="text-gray-700 mb-6">
-            New monthly reports published on the first Monday of each month.
-          </p>
-          <Link
-            href="/"
-            className="inline-block px-8 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors"
-          >
-            View Latest News
-          </Link>
+        {/* Navigation */}
+        <section className="bg-gray-50 rounded-lg p-8">
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link
+              href="/monthly"
+              className="inline-block px-8 py-3 bg-gray-800 text-white font-bold rounded-lg hover:bg-gray-900 transition-colors"
+            >
+              ← All Monthly Reports
+            </Link>
+            <Link
+              href="/weekly"
+              className="inline-block px-8 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors"
+            >
+              View Weekly Digests
+            </Link>
+            <Link
+              href="/"
+              className="inline-block px-8 py-3 bg-gray-200 text-gray-800 font-bold rounded-lg hover:bg-gray-300 transition-colors"
+            >
+              Latest News
+            </Link>
+          </div>
         </section>
       </div>
-
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(report.metadata.structuredData),
-        }}
-      />
     </main>
   );
 }

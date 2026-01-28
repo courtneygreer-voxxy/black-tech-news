@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { getMonthBounds } from '@/lib/monthly/generator';
+import pool from '@/lib/db/client';
 
 export const metadata: Metadata = {
   title: 'State of Black Tech Monthly Reports - Black Tech News',
@@ -13,30 +13,42 @@ export const metadata: Metadata = {
   },
 };
 
-// Generate current month's report
-function getCurrentMonthReport() {
-  const today = new Date();
-  const monthDate = new Date(today.getFullYear(), today.getMonth(), 1);
-  const bounds = getMonthBounds(monthDate);
+export const revalidate = 300; // Revalidate every 5 minutes
 
-  const reportId = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
-  const monthName = monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-
-  return {
-    id: reportId,
-    title: `State of Black Tech: ${monthName}`,
-    monthName,
-    date: monthDate,
-    monthStart: bounds.monthStart,
-    monthEnd: bounds.monthEnd,
-  };
+interface MonthlySummary {
+  id: number;
+  month_start: string;
+  month_end: string;
+  publication_date: string;
+  title: string;
+  theme: string | null;
+  article_count: number;
+  is_published: boolean;
+  created_at: string;
+  published_at: string | null;
 }
 
-export default function MonthlyArchivePage() {
-  const today = new Date();
-  const dayOfMonth = today.getDate();
-  const showCurrentReport = dayOfMonth >= 28; // Only show after the 28th of each month
-  const currentReport = showCurrentReport ? getCurrentMonthReport() : null;
+async function getPublishedSummaries(): Promise<MonthlySummary[]> {
+  try {
+    const result = await pool.query(`
+      SELECT
+        id, month_start, month_end, publication_date, title, theme,
+        article_count, is_published, created_at, published_at
+      FROM monthly_summaries
+      WHERE is_published = true
+      ORDER BY publication_date DESC
+    `);
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching monthly summaries:', error);
+    return [];
+  }
+}
+
+export default async function MonthlyArchivePage() {
+  const summaries = await getPublishedSummaries();
+  const latestSummary = summaries[0];
+  const pastSummaries = summaries.slice(1);
 
   return (
     <main className="min-h-screen bg-white">
@@ -91,94 +103,110 @@ export default function MonthlyArchivePage() {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-8 py-12">
-        {/* Current Month or Generating State */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-8 flex items-center">
-            <span className="w-1 h-8 bg-red-600 mr-4"></span>
-            Latest Report
-          </h2>
+        {latestSummary ? (
+          <>
+            {/* Latest Report */}
+            <section className="mb-16">
+              <h2 className="text-3xl font-bold mb-8 flex items-center">
+                <span className="w-1 h-8 bg-red-600 mr-4"></span>
+                Latest Report
+              </h2>
 
-          {currentReport ? (
-            <Link
-              href={`/monthly/${currentReport.id}`}
-              className="block border-2 border-gray-200 rounded-lg p-8 hover:border-red-600 transition-all hover:shadow-xl"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-3xl font-bold text-gray-900 mb-3">
-                    {currentReport.title}
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Published {currentReport.date.toLocaleDateString('en-US', {
-                      month: 'long',
-                      year: 'numeric'
-                    })}
-                  </p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="px-3 py-1 bg-red-100 text-red-800 text-sm font-medium rounded-full">
-                      Funding Analysis
-                    </span>
-                    <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
-                      Talent Trends
-                    </span>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-                      Innovation
-                    </span>
-                    <span className="px-3 py-1 bg-purple-100 text-purple-800 text-sm font-medium rounded-full">
-                      Community Impact
-                    </span>
-                    <span className="px-3 py-1 bg-orange-100 text-orange-800 text-sm font-medium rounded-full">
-                      Outlook
-                    </span>
+              <Link
+                href={`/monthly/${latestSummary.publication_date.substring(0, 7)}`}
+                className="block border-2 border-gray-200 rounded-lg p-8 hover:border-red-600 transition-all hover:shadow-xl"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-3xl font-bold text-gray-900 mb-3">
+                      {latestSummary.title}
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Published {new Date(latestSummary.publication_date).toLocaleDateString('en-US', {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </p>
                   </div>
+                  <span className="px-5 py-2 bg-red-600 text-white font-bold rounded-lg text-sm ml-4">
+                    LATEST
+                  </span>
                 </div>
-                <span className="px-5 py-2 bg-red-600 text-white font-bold rounded-lg text-sm ml-4">
-                  LATEST
+                {latestSummary.theme && (
+                  <p className="text-gray-700 mb-6 leading-relaxed line-clamp-4">
+                    {latestSummary.theme}
+                  </p>
+                )}
+                <p className="text-sm text-gray-500 mb-4">
+                  {latestSummary.article_count} articles featured
+                </p>
+                <span className="text-red-600 font-medium inline-flex items-center text-lg">
+                  Read this month's report
+                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </span>
-              </div>
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                Comprehensive analysis of this month's Black tech ecosystem: funding activity, career opportunities,
-                product launches, community initiatives, and forward-looking insights. Includes data visualizations,
-                sector breakdowns, and tailored guidance for students, professionals, and founders.
+              </Link>
+            </section>
+
+            {/* Past Reports */}
+            {pastSummaries.length > 0 && (
+              <section className="mb-16">
+                <h2 className="text-3xl font-bold mb-8 flex items-center">
+                  <span className="w-1 h-8 bg-red-600 mr-4"></span>
+                  Past Reports
+                </h2>
+
+                <div className="space-y-6">
+                  {pastSummaries.map((summary) => (
+                    <Link
+                      key={summary.id}
+                      href={`/monthly/${summary.publication_date.substring(0, 7)}`}
+                      className="block border-2 border-gray-200 rounded-lg p-6 hover:border-red-600 transition-all hover:shadow-lg"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                            {summary.title}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {new Date(summary.publication_date).toLocaleDateString('en-US', {
+                              month: 'long',
+                              year: 'numeric'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                      {summary.theme && (
+                        <p className="text-gray-700 text-sm mb-3 line-clamp-3">
+                          {summary.theme}
+                        </p>
+                      )}
+                      <p className="text-xs text-gray-500">
+                        {summary.article_count} articles
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
+        ) : (
+          <section className="mb-16">
+            <h2 className="text-3xl font-bold mb-8 flex items-center">
+              <span className="w-1 h-8 bg-red-600 mr-4"></span>
+              Latest Report
+            </h2>
+            <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+              <div className="text-5xl mb-4">📊</div>
+              <h3 className="text-xl font-bold mb-3">No Reports Yet</h3>
+              <p className="text-gray-600 max-w-md mx-auto">
+                Monthly reports will appear here once they're published. Check back soon for comprehensive State of Black Tech analysis.
               </p>
-              <span className="text-red-600 font-medium inline-flex items-center text-lg">
-                Read this month's report
-                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </Link>
-          ) : (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 bg-gray-50">
-              <div className="text-center">
-                <div className="text-6xl mb-4">⏳</div>
-                <h3 className="text-2xl font-bold mb-3">Report Generating</h3>
-                <p className="text-gray-600 mb-4 max-w-lg mx-auto">
-                  The monthly State of Black Tech report is currently being compiled. Reports are generated after the 28th of each month to ensure comprehensive data coverage.
-                </p>
-                <p className="text-sm text-gray-500">
-                  Check back on the first Monday of next month at 8:00 AM EST for the full report.
-                </p>
-              </div>
             </div>
-          )}
-        </section>
-
-        {/* Coming Soon */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-8 flex items-center">
-            <span className="w-1 h-8 bg-red-600 mr-4"></span>
-            Past Reports
-          </h2>
-
-          <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-            <div className="text-5xl mb-4">📊</div>
-            <h3 className="text-xl font-bold mb-3">Archive Building Monthly</h3>
-            <p className="text-gray-600 max-w-md mx-auto">
-              Past reports will appear here as they're published. Check back on the first Monday of each month at 8:00 AM EST for comprehensive State of Black Tech analysis.
-            </p>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Who Should Read */}
         <section className="mb-16 bg-gradient-to-br from-gray-50 to-white rounded-lg p-8 border border-gray-200">
