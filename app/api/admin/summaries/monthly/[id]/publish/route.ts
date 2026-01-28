@@ -5,7 +5,7 @@ import pool from "@/lib/db/client"
 // POST /api/admin/summaries/monthly/[id]/publish - Toggle publish status
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth()
 
@@ -14,6 +14,7 @@ export async function POST(
   }
 
   try {
+    const { id } = await params
     const body = await request.json()
     const { is_published } = body
 
@@ -23,7 +24,7 @@ export async function POST(
            published_at = CASE WHEN $1 = true THEN CURRENT_TIMESTAMP ELSE NULL END
        WHERE id = $2
        RETURNING id`,
-      [is_published, params.id]
+      [is_published, id]
     )
 
     if (result.rows.length === 0) {
