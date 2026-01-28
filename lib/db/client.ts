@@ -1,21 +1,31 @@
 import { Pool, PoolClient } from 'pg';
 
-// Database configuration for Google Cloud SQL
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT || '5432'),
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-
-  // Google Cloud SQL specific settings
-  ssl: process.env.DB_SSL === 'true' ? {
-    rejectUnauthorized: false
-  } : false,
-});
+// Database configuration - supports both connection string and individual params
+const pool = new Pool(
+  process.env.POSTGRES_URL || process.env.DATABASE_URL
+    ? {
+        connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
+        ssl: {
+          rejectUnauthorized: false,
+        },
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 2000,
+      }
+    : {
+        host: process.env.DB_HOST || process.env.POSTGRES_HOST,
+        port: parseInt(process.env.DB_PORT || process.env.POSTGRES_PORT || '5432'),
+        database: process.env.DB_NAME || process.env.POSTGRES_DATABASE,
+        user: process.env.DB_USER || process.env.POSTGRES_USER,
+        password: process.env.DB_PASSWORD || process.env.POSTGRES_PASSWORD,
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 2000,
+        ssl: process.env.DB_SSL === 'true' ? {
+          rejectUnauthorized: false
+        } : false,
+      }
+);
 
 // Test the connection
 pool.on('connect', () => {
