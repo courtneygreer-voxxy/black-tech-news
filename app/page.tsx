@@ -212,11 +212,7 @@ export default function HomePage() {
     <ErrorBoundary>
       {articles.length > 0 && <StructuredData articles={articles} />}
 
-      <BTNNavbar
-        onRefresh={() => loadArticles(true)}
-        isRefreshing={isRefreshing}
-        lastRefresh={lastRefresh}
-      />
+      <BTNNavbar />
 
       <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 py-8 sm:py-12 w-full">
         {loading ? (
@@ -362,31 +358,6 @@ export default function HomePage() {
       </main>
 
       <BTNFooter />
-
-      {/* Floating Refresh Button */}
-      <button
-        onClick={() => loadArticles(true)}
-        disabled={isRefreshing}
-        className="fixed bottom-8 right-8 p-4 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700 hover:scale-110 disabled:opacity-50 disabled:hover:scale-100 transition-all duration-200 z-50 group"
-        aria-label="Refresh articles"
-      >
-        <svg
-          className={`w-6 h-6 ${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-          />
-        </svg>
-        <span className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-black text-white text-sm rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-          Refresh articles
-        </span>
-      </button>
     </ErrorBoundary>
   );
 }
