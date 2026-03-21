@@ -59,7 +59,7 @@ export async function POST() {
 
     // Filter articles that were published during the target week
     const weekArticles = allArticles.filter((article: any) => {
-      const publishedDate = new Date(article.published_at)
+      const publishedDate = new Date(article.publishedAt)
       return publishedDate >= lastSunday && publishedDate <= lastSaturday
     })
 
@@ -72,7 +72,7 @@ export async function POST() {
 
     // Take top 10 articles (they're already sorted by published_at DESC from the API)
     const topArticles = weekArticles.slice(0, 10)
-    const articleIds = topArticles.map((a: any) => a.external_id)
+    const articleIds = topArticles.map((a: any) => a.id)
 
     // Generate AI theme using Claude
     const theme = await generateWeeklyTheme(
