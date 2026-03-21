@@ -52,7 +52,7 @@ Black Tech News is a premium news aggregator showcasing the latest innovations, 
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **API**: Wolf Development Studio (Vercel)
-- **Deployment**: Cloudflare Pages
+- **Deployment**: Vercel
 - **Date Handling**: date-fns
 
 ---
@@ -173,27 +173,12 @@ articles.sort((a, b) => {
 
 ## 🚢 Deployment
 
-### Cloudflare Pages (Recommended)
+### Vercel (Recommended)
 
-1. **Build the static site**
-```bash
-npm run build
-```
-
-2. **Deploy via Cloudflare Dashboard**
-   - Go to Pages → Create a project
-   - Connect your GitHub repository
-   - Build command: `npm run build`
-   - Build output directory: `out`
-   - Framework preset: Next.js (Static HTML Export)
-
-3. **Set environment variables**
-   - Go to Settings → Environment Variables
-   - Add: `NEXT_PUBLIC_API_URL=https://wolf-development-studio.vercel.app`
-
-4. **Configure custom domain**
-   - Add custom domain: `blacktechnews.cc`
-   - Update DNS records at your registrar
+1. **Connect your GitHub repository** in the Vercel Dashboard
+2. Vercel auto-detects Next.js — no build configuration needed
+3. **Set environment variables** in Vercel Dashboard → Settings → Environment Variables
+4. **Configure custom domain**: `blacktechnews.cc`
 
 ---
 
