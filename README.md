@@ -8,7 +8,7 @@ Black Tech News is a premium news aggregator showcasing the latest innovations, 
 
 ## 🌐 Live Site
 
-**https://blacktechnews.cc** (coming soon)
+**https://blacktechnews.cc**
 
 ---
 
