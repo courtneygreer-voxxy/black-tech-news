@@ -13,7 +13,7 @@ export async function generateWeeklyTheme(
   weekStart: Date,
   weekEnd: Date
 ): Promise<string> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
   const prompt = `You are analyzing a weekly digest of Black tech news articles. Given the following ${articles.length} articles from the week of ${weekStart.toLocaleDateString()} to ${weekEnd.toLocaleDateString()}, generate a compelling 2-3 paragraph theme that:
 
@@ -42,7 +42,7 @@ export async function generateMonthlyTheme(
   monthStart: Date,
   monthEnd: Date
 ): Promise<string> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
   const monthName = monthStart.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   const prompt = `You are creating the "State of Black Tech" monthly executive summary. Given the following ${articles.length} top articles from ${monthName}, generate a comprehensive 3-4 paragraph executive summary that:
