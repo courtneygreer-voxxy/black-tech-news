@@ -57,6 +57,25 @@ export default async function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-medium text-gray-900">
+                Monthly Reports
+              </h2>
+              <p className="mt-1 text-sm text-gray-500">
+                Generate and manage monthly State of Black Tech reports
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/admin/summaries/monthly"
+            className="mt-4 inline-block px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          >
+            Manage Monthly
+          </Link>
+        </div>
+
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-medium text-gray-900">
                 Email Subscribers
               </h2>
               <p className="mt-1 text-sm text-gray-500">

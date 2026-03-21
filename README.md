@@ -26,6 +26,12 @@ Black Tech News is a premium news aggregator showcasing the latest innovations, 
 - **Educational focus** for students, professionals, and founders
 - **Archive building naturally** week-by-week
 
+### Monthly Reports
+- **"State of Black Tech"** comprehensive ecosystem analysis
+- **6 core sections**: Funding, Talent, Innovation, Community, Outlook
+- **Data visualizations** and sector breakdowns
+- **Published first Monday** of each month at 8:00 AM EST
+
 ### Pan-African Design
 - **Red, Black, Green color scheme** celebrating Pan-African heritage
 - **Professional typography** with modern styling
@@ -36,7 +42,7 @@ Black Tech News is a premium news aggregator showcasing the latest innovations, 
 - **Education-focused metadata** targeting HBCUs and students
 - **AI-parseable structure** for LLM consumption
 - **Schema.org structured data** for rich search results
-- **Weekly citation velocity** for authority building
+- **Monthly citation velocity** for authority building
 
 ---
 
@@ -98,6 +104,9 @@ black-tech-news/
 │   ├── weekly/
 │   │   ├── page.tsx            # Weekly digest archive
 │   │   └── [date]/page.tsx     # Individual weekly digest
+│   ├── monthly/
+│   │   ├── page.tsx            # Monthly report archive
+│   │   └── [date]/page.tsx     # Individual monthly report
 │   └── globals.css             # Global styles and animations
 ├── components/
 │   ├── BTNNavbar.tsx           # Navigation bar
@@ -112,12 +121,16 @@ black-tech-news/
 │   ├── weekly/
 │   │   ├── types.ts            # Weekly digest TypeScript types
 │   │   └── generator.ts        # Weekly digest generation logic
+│   ├── monthly/
+│   │   ├── types.ts            # Monthly report TypeScript types
+│   │   └── generator.ts        # Monthly report generation logic
 │   ├── config.ts               # API configuration
 │   └── news/
 │       └── types.ts            # TypeScript interfaces
 ├── .github/
 │   └── workflows/
-│       └── weekly-digest.yml   # Monday 6 AM automation
+│       ├── weekly-digest.yml   # Monday 6 AM automation
+│       └── monthly-report.yml  # First Monday automation
 ├── public/
 │   └── sources/                # Source logos
 ├── .env.local                  # Environment variables (not committed)
@@ -216,6 +229,7 @@ trackArticleView(articleUrl, articleTitle, sourceName);
 - [x] Responsive layout
 - [x] Article view tracking
 - [x] Weekly digest automation (Mondays 6 AM EST)
+- [x] Monthly report automation (First Monday 8 AM EST)
 - [x] SEO optimization for education sector
 - [x] Privacy-first analytics system
 
