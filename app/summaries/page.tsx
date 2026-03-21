@@ -2,19 +2,56 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import BTNNavbar from '@/components/BTNNavbar';
 import BTNFooter from '@/components/BTNFooter';
+import pool from '@/lib/db/client';
 
 export const metadata: Metadata = {
   title: 'Summaries - Black Tech News',
-  description: 'Weekly digests and monthly reports curating the most important Black tech news stories, trends, and insights.',
-  keywords: ['Black tech weekly digest', 'Black tech monthly report', 'tech news summary', 'HBCU tech news', 'Black founders news'],
+  description: 'Weekly digests curating the most important Black tech news stories, trends, and insights.',
+  keywords: ['Black tech weekly digest', 'tech news summary', 'HBCU tech news', 'Black founders news'],
   openGraph: {
     title: 'Black Tech News Summaries',
-    description: 'Curated weekly and monthly summaries of Black tech news',
+    description: 'Curated weekly summaries of Black tech news',
     type: 'website',
   },
 };
 
-export default function SummariesPage() {
+export const revalidate = 300;
+
+interface WeeklySummary {
+  id: number;
+  week_start: string;
+  week_end: string;
+  publication_date: string;
+  title: string;
+  theme: string | null;
+  article_count: number;
+  is_published: boolean;
+  created_at: string;
+  published_at: string | null;
+}
+
+async function getPublishedSummaries(): Promise<WeeklySummary[]> {
+  try {
+    const result = await pool.query(`
+      SELECT
+        id, week_start, week_end, publication_date, title, theme,
+        article_count, is_published, created_at, published_at
+      FROM weekly_summaries
+      WHERE is_published = true
+      ORDER BY publication_date DESC
+    `);
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching weekly summaries:', error);
+    return [];
+  }
+}
+
+export default async function SummariesPage() {
+  const summaries = await getPublishedSummaries();
+  const latestSummary = summaries[0];
+  const pastSummaries = summaries.slice(1);
+
   return (
     <>
       <BTNNavbar />
@@ -32,7 +69,7 @@ export default function SummariesPage() {
               <h1 className="text-5xl font-bold">Summaries</h1>
             </div>
             <p className="text-gray-300 text-xl max-w-2xl">
-              Curated insights and analysis of Black tech news, delivered weekly and monthly
+              Curated insights and analysis of Black tech news, delivered weekly
             </p>
           </div>
         </div>
@@ -50,131 +87,105 @@ export default function SummariesPage() {
               </p>
             </div>
 
-            {/* Coming Soon Card */}
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-              <div className="max-w-xl mx-auto">
-                <div className="mb-6 flex justify-center">
-                  <div className="relative w-20 h-20">
-                    <div className="absolute inset-0 flex space-x-2">
-                      <div className="flex-1 bg-red-600 rounded-lg opacity-30"></div>
-                      <div className="flex-1 bg-black rounded-lg opacity-30"></div>
-                      <div className="flex-1 bg-green-600 rounded-lg opacity-30"></div>
+            {latestSummary ? (
+              <>
+                {/* Latest Digest */}
+                <Link
+                  href={`/weekly/${latestSummary.publication_date}`}
+                  className="block border-2 border-gray-200 rounded-xl p-8 hover:border-red-600 transition-all hover:shadow-lg mb-8"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                        {latestSummary.title}
+                      </h3>
+                      <p className="text-gray-600">
+                        Published {new Date(latestSummary.publication_date).toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          month: 'long',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </p>
                     </div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
+                    <span className="px-4 py-2 bg-red-600 text-white font-bold rounded-lg text-sm">
+                      LATEST
+                    </span>
                   </div>
+                  {latestSummary.theme && (
+                    <p className="text-gray-700 mb-4 line-clamp-3">
+                      {latestSummary.theme}
+                    </p>
+                  )}
+                  <p className="text-sm text-gray-500 mb-4">
+                    {latestSummary.article_count} articles featured
+                  </p>
+                  <span className="text-red-600 font-medium inline-flex items-center">
+                    Read this week&apos;s digest
+                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                </Link>
+
+                {/* Past Digests */}
+                {pastSummaries.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">Past Digests</h3>
+                    {pastSummaries.map((summary) => (
+                      <Link
+                        key={summary.id}
+                        href={`/weekly/${summary.publication_date}`}
+                        className="block border-2 border-gray-200 rounded-lg p-6 hover:border-red-600 transition-all hover:shadow-lg"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h4 className="text-lg font-bold text-gray-900 mb-1">
+                              {summary.title}
+                            </h4>
+                            <p className="text-sm text-gray-600">
+                              {new Date(summary.publication_date).toLocaleDateString('en-US', {
+                                month: 'long',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                        {summary.theme && (
+                          <p className="text-gray-700 text-sm mb-3 line-clamp-2">
+                            {summary.theme}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-500">
+                          {summary.article_count} articles
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
+                <div className="max-w-xl mx-auto">
+                  <div className="text-5xl mb-6">📰</div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">No Digests Yet</h3>
+                  <p className="text-gray-600 mb-6 leading-relaxed">
+                    Weekly digests will appear here once they&apos;re published. Check back soon for curated Black tech news summaries featuring top stories and AI-powered insights.
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    New digests published every Monday at 6:00 AM EST
+                  </p>
                 </div>
-
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Coming Soon</h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  Starting next week, you'll find our weekly digests here featuring:
-                </p>
-
-                <div className="space-y-3 text-left max-w-md mx-auto mb-8">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-1.5 h-6 bg-red-600 mt-0.5 flex-shrink-0"></div>
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Top 10 Stories</span> from the past week
-                    </p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-1.5 h-6 bg-red-600 mt-0.5 flex-shrink-0"></div>
-                    <p className="text-gray-700">
-                      <span className="font-semibold">AI-Generated Themes</span> identifying trends and patterns
-                    </p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-1.5 h-6 bg-red-600 mt-0.5 flex-shrink-0"></div>
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Insightful Analysis</span> on why these stories matter
-                    </p>
-                  </div>
-                </div>
-
-                <p className="text-sm text-gray-500">
-                  First digest drops Monday, February 3, 2026
-                </p>
               </div>
-            </div>
-          </section>
-
-          {/* Monthly Reports Section */}
-          <section>
-            <div className="mb-8">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4 flex items-center">
-                <span className="w-1 h-10 bg-red-600 mr-4"></span>
-                Monthly Reports
-              </h2>
-              <p className="text-gray-600 text-lg">
-                Executive-style "State of Black Tech" reports published on the first Monday of each month
-              </p>
-            </div>
-
-            {/* Coming Soon Card */}
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-              <div className="max-w-xl mx-auto">
-                <div className="mb-6 flex justify-center">
-                  <div className="relative w-20 h-20">
-                    <div className="absolute inset-0 flex space-x-2">
-                      <div className="flex-1 bg-red-600 rounded-lg opacity-30"></div>
-                      <div className="flex-1 bg-black rounded-lg opacity-30"></div>
-                      <div className="flex-1 bg-green-600 rounded-lg opacity-30"></div>
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Coming Soon</h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  Our first monthly report will be published in February, featuring:
-                </p>
-
-                <div className="space-y-3 text-left max-w-md mx-auto mb-8">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-1.5 h-6 bg-red-600 mt-0.5 flex-shrink-0"></div>
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Top 10 Stories</span> from the entire month
-                    </p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-1.5 h-6 bg-red-600 mt-0.5 flex-shrink-0"></div>
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Strategic Insights</span> about the Black tech ecosystem
-                    </p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-1.5 h-6 bg-red-600 mt-0.5 flex-shrink-0"></div>
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Big Picture Analysis</span> of breakthrough achievements
-                    </p>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-1.5 h-6 bg-red-600 mt-0.5 flex-shrink-0"></div>
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Industry Trends</span> shaping Black innovation
-                    </p>
-                  </div>
-                </div>
-
-                <p className="text-sm text-gray-500">
-                  First report drops Monday, March 3, 2026
-                </p>
-              </div>
-            </div>
+            )}
           </section>
 
           {/* Call to Action */}
-          <section className="mt-16 bg-gray-50 rounded-lg p-8 text-center">
+          <section className="bg-gray-50 rounded-lg p-8 text-center">
             <h2 className="text-2xl font-bold mb-4">Never Miss a Summary</h2>
             <p className="text-gray-700 mb-6">
-              Get notified when our weekly digests and monthly reports are published
+              Get notified when our weekly digests are published
             </p>
             <Link
               href="/"
