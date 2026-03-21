@@ -1,7 +1,7 @@
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 import pool from "@/lib/db/client"
-import { generateWeeklyTheme } from "@/lib/ai/gemini"
+// import { generateWeeklyTheme } from "@/lib/ai/gemini"
 
 // POST /api/admin/summaries/weekly/generate - Generate new weekly summary
 export async function POST() {
@@ -74,16 +74,8 @@ export async function POST() {
     const topArticles = weekArticles.slice(0, 10)
     const articleIds = topArticles.map((a: any) => a.id)
 
-    // Generate AI theme using Claude
-    const theme = await generateWeeklyTheme(
-      topArticles.map((a: any) => ({
-        title: a.title,
-        excerpt: a.excerpt,
-        url: a.url,
-      })),
-      lastSunday,
-      lastSaturday
-    )
+    // Theme generation disabled (Gemini quota exceeded)
+    const theme: string | null = null
 
     // Generate title
     const weekStartStr = lastSunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
