@@ -95,7 +95,7 @@ export default function EmailSignup() {
               {/* Header */}
               <div className="bg-black text-white p-6 border-b-4 border-red-600">
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-2xl font-bold">Stay Informed</h2>
+                  <h2 className="text-2xl font-bold">Your Source for Black Tech</h2>
                   <button
                     onClick={() => setIsOpen(false)}
                     className="text-white hover:text-red-600 transition-colors"
@@ -117,7 +117,7 @@ export default function EmailSignup() {
                   </button>
                 </div>
                 <p className="text-gray-300 text-sm">
-                  Get weekly Black tech news delivered to your inbox every Monday
+                  The most curated and up-to-date diversity tech stories, delivered weekly
                 </p>
               </div>
 
@@ -149,31 +149,28 @@ export default function EmailSignup() {
                   <>
                     <div className="mb-6">
                       <h3 className="text-lg font-bold text-gray-900 mb-3">
-                        What you'll get:
+                        Built for journalists, reporters, and creators
                       </h3>
+                      <p className="text-gray-600 text-sm mb-4">
+                        Get a curated weekly digest of the latest stories in diversity tech — ready to reference, share, or build on.
+                      </p>
                       <ul className="space-y-3">
                         <li className="flex items-start">
                           <span className="w-1 h-6 bg-red-600 mr-3 mt-1"></span>
                           <span className="text-gray-700">
-                            Weekly digest of top Black tech stories
+                            Curated stories on Black tech and innovation
                           </span>
                         </li>
                         <li className="flex items-start">
                           <span className="w-1 h-6 bg-red-600 mr-3 mt-1"></span>
                           <span className="text-gray-700">
-                            Startup funding announcements
+                            Weekly digest delivered every Monday
                           </span>
                         </li>
                         <li className="flex items-start">
                           <span className="w-1 h-6 bg-red-600 mr-3 mt-1"></span>
                           <span className="text-gray-700">
-                            Career opportunities at leading tech companies
-                          </span>
-                        </li>
-                        <li className="flex items-start">
-                          <span className="w-1 h-6 bg-red-600 mr-3 mt-1"></span>
-                          <span className="text-gray-700">
-                            HBCU tech programs and resources
+                            Sourced from top diversity-focused publications
                           </span>
                         </li>
                       </ul>
