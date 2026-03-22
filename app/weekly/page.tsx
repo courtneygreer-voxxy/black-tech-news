@@ -58,7 +58,7 @@ export default async function WeeklyArchivePage() {
           <div className="flex items-center space-x-3 mb-4">
             <div className="flex space-x-1">
               <div className="w-2 h-12 bg-red-600"></div>
-              <div className="w-2 h-12 bg-white"></div>
+              <div className="w-2 h-12 bg-yellow-400"></div>
               <div className="w-2 h-12 bg-green-600"></div>
             </div>
             <div>

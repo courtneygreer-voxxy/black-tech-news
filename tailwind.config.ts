@@ -12,7 +12,7 @@ const config: Config = {
         // Pan-African color scheme
         'pan-african': {
           red: '#E31C23',
-          black: '#000000',
+          yellow: '#FFD700',
           green: '#00843D',
         },
         // Additional accent colors

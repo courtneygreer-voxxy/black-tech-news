@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Instagram, Calendar } from 'lucide-react';
+import { Instagram, Mail } from 'lucide-react';
 
 interface BTNNavbarProps {
   onRefresh?: () => void;
@@ -40,7 +40,7 @@ export default function BTNNavbar({ onRefresh, isRefreshing, lastRefresh }: BTNN
           <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
             <div className="flex space-x-1">
               <div className="w-1.5 h-8 sm:w-2 sm:h-12 bg-red-600"></div>
-              <div className="w-1.5 h-8 sm:w-2 sm:h-12 bg-black"></div>
+              <div className="w-1.5 h-8 sm:w-2 sm:h-12 bg-yellow-400"></div>
               <div className="w-1.5 h-8 sm:w-2 sm:h-12 bg-green-600"></div>
             </div>
             <div>
@@ -55,16 +55,14 @@ export default function BTNNavbar({ onRefresh, isRefreshing, lastRefresh }: BTNN
 
           {/* Navigation & Social Media */}
           <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-6">
-            {/* Summaries Link */}
-            <Link
-              href="/summaries"
-              className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors group"
+            {/* Join Email List */}
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('open-email-signup'))}
+              className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold text-sm"
             >
-              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 group-hover:text-red-600 transition-colors" />
-              <span className="hidden sm:inline font-semibold text-gray-700 group-hover:text-black">
-                Summaries
-              </span>
-            </Link>
+              <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline">Join Email List</span>
+            </button>
 
             {/* Social Media Links */}
             <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4 border-l border-gray-200 pl-2 sm:pl-4 lg:pl-6">

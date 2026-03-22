@@ -63,7 +63,7 @@ export default async function SummariesPage() {
             <div className="flex items-center space-x-3 mb-6">
               <div className="flex space-x-1">
                 <div className="w-2 h-16 bg-red-600"></div>
-                <div className="w-2 h-16 bg-white"></div>
+                <div className="w-2 h-16 bg-yellow-400"></div>
                 <div className="w-2 h-16 bg-green-600"></div>
               </div>
               <h1 className="text-5xl font-bold">Summaries</h1>

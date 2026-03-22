@@ -33,7 +33,7 @@ export default function HeroArticle({ article }: HeroArticleProps) {
       className="block group cursor-pointer"
     >
         {/* Hero Image */}
-        <div className="relative h-96 bg-gradient-to-br from-red-600 via-black to-green-600 rounded-lg overflow-hidden mb-6">
+        <div className="relative h-96 bg-gradient-to-br from-red-600 via-yellow-400 to-green-600 rounded-lg overflow-hidden mb-6">
           {article.imageUrl ? (
             <Image
               src={article.imageUrl}
@@ -48,7 +48,7 @@ export default function HeroArticle({ article }: HeroArticleProps) {
             <div className="w-full h-full flex items-center justify-center">
               <div className="flex space-x-4">
                 <div className="w-8 h-64 bg-red-600 opacity-50"></div>
-                <div className="w-8 h-64 bg-black opacity-50"></div>
+                <div className="w-8 h-64 bg-yellow-400 opacity-50"></div>
                 <div className="w-8 h-64 bg-green-600 opacity-50"></div>
               </div>
             </div>

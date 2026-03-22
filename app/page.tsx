@@ -159,9 +159,12 @@ export default function HomePage() {
     window.scrollTo({ top: 200, behavior: 'smooth' });
   };
 
-  const heroArticle = filteredArticles[0];
+  // Hero must have an image — skip imageless articles to Latest News
+  const heroArticle = currentPage === 1
+    ? filteredArticles.find(a => a.imageUrl)
+    : undefined;
   const regularArticles = currentPage === 1
-    ? filteredArticles.slice(1, ITEMS_PER_PAGE)
+    ? filteredArticles.filter(a => a !== heroArticle).slice(0, ITEMS_PER_PAGE - 1)
     : paginatedArticles;
 
   return (

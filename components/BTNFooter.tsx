@@ -14,7 +14,7 @@ export default function BTNFooter() {
             <div className="flex items-center space-x-3">
               <div className="flex space-x-1">
                 <div className="w-2 h-8 bg-red-600"></div>
-                <div className="w-2 h-8 bg-white"></div>
+                <div className="w-2 h-8 bg-yellow-400"></div>
                 <div className="w-2 h-8 bg-green-600"></div>
               </div>
               <div>

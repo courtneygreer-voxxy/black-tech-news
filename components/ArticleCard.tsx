@@ -56,7 +56,7 @@ export default function ArticleCard({
               <div className="w-full h-full flex items-center justify-center">
                 <div className="flex space-x-2">
                   <div className="w-4 h-24 bg-red-600"></div>
-                  <div className="w-4 h-24 bg-black"></div>
+                  <div className="w-4 h-24 bg-yellow-400"></div>
                   <div className="w-4 h-24 bg-green-600"></div>
                 </div>
               </div>
@@ -132,7 +132,7 @@ export default function ArticleCard({
               <div className="w-full h-full flex items-center justify-center">
                 <div className="flex space-x-1">
                   <div className="w-2 h-12 bg-red-600"></div>
-                  <div className="w-2 h-12 bg-black"></div>
+                  <div className="w-2 h-12 bg-yellow-400"></div>
                   <div className="w-2 h-12 bg-green-600"></div>
                 </div>
               </div>
